@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnostic Test & Differentiated Learning</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      padding: 20px;
+      margin: 0;
+    }
+    .quiz-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #1a5f7a;
+      margin-bottom: 25px;
+    }
+    .page-section {
+      display: none;
+    }
+    .active-section {
+      display: block !important;
+    }
+    #registration-card {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-left: 5px solid #1a5f7a;
+      border-radius: 8px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #1a5f7a;
+    }
+    .form-group input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    .question-card {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-left: 5px solid #1a5f7a;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+    }
+    .question-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .option-label {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #dcdcdc;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .option-label:hover {
+      background: #f0f7ff;
+      border-color: #007bff;
+    }
+    .option-label input {
+      margin-right: 12px;
+    }
+    .btn-submit {
+      display: block;
+      width: 100%;
+      background-color: #1a5f7a;
+      color: #fff;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 25px;
+    }
+    .btn-submit:hover {
+      background-color: #134659;
+    }
+    .material-box {
+      background: #f8fbfe;
+      border: 1px solid #bce1f3;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+    .score-banner {
+      background-color: #eef7fc;
+      border: 2px dashed #1a5f7a;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #1a5f7a;
+      margin-bottom: 20px;
+    }
+    .external-btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-container">
+
+  <!-- STEP 1: REGISTRATION SECTION -->
+  <div id="section-register" class="page-section active-section">
+    <h2>Diagnostic Test: Forces Concept</h2>
+    <div id="registration-card">
+      <div class="form-group">
+        <label for="studentName">Please enter your Full Name before starting:</label>
+        <input type="text" id="studentName" placeholder="e.g. John Doe">
+      </div>
+      <button type="button" class="btn-submit" id="startBtn">Start Test</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: QUIZ SECTION (15 QUESTIONS) -->
+  <div id="section-quiz" class="page-section">
+    <h2>Diagnostic Test: Forces Concept</h2>
+
+    <!-- Q1 -->
+    <div class="question-card">
+      <div class="question-title">1. A child of weight 420 N is sitting on a swing with her feet on the ground. The child experiences an upward force from the ground of 130 N and an upward force from the swing of 290 N. What is the resultant force on the child?</div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q1" value="A"> A. 0 N</label>
+        <label class="option-label"><input type="radio" name="q1" value="B"> B. 260 N</label>
+        <label class="option-label"><input type="radio" name="q1" value="C"> C. 580 N</label>
+        <label class="option-label"><input type="radio" name="q1" value="D"> D. 840 N</label>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-card">
+      <div class="question-title">2. The diagrams show four identical objects. Each object is acted on by only the forces shown. Which diagram shows an object in equilibrium?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/e0xjdfo.jpeg" alt="Question 2 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q2" value="A"> A. Diagram A</label>
+        <label class="option-label"><input type="radio" name="q2" value="B"> B. Diagram B</label>
+        <label class="option-label"><input type="radio" name="q2" value="C"> C. Diagram C</label>
+        <label class="option-label"><input type="radio" name="q2" value="D"> D. Diagram D</label>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-card">
+      <div class="question-title">3. A uniform wooden ruler is pivoted at its centre. A load of 2.0 N is suspended from each end of the ruler. The pivot exerts an upward force F on the ruler. What is F equal to?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/lSzjvQR.jpeg" alt="Question 3 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q3" value="A"> A. 2.0 N</label>
+        <label class="option-label"><input type="radio" name="q3" value="B"> B. The weight of the ruler</label>
+        <label class="option-label"><input type="radio" name="q3" value="C"> C. 4.0 N</label>
+        <label class="option-label"><input type="radio" name="q3" value="D"> D. 4.0 N plus the weight of the ruler</label>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-card">
+      <div class="question-title">4. On which ball is a non-zero resultant force acting?</div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q4" value="A"> A. A ball moving at constant speed on a smooth surface</label>
+        <label class="option-label"><input type="radio" name="q4" value="B"> B. A ball at rest on a bench</label>
+        <label class="option-label"><input type="radio" name="q4" value="C"> C. A free-falling ball which has just been released</label>
+        <label class="option-label"><input type="radio" name="q4" value="D"> D. A ball floating on water</label>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-card">
+      <div class="question-title">5. A car moves along a level road. The diagram shows all of the horizontal forces acting on the car. Which statement is correct?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/HsqkqG3.jpeg" alt="Question 5 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q5" value="A"> A. The car is slowing down.</label>
+        <label class="option-label"><input type="radio" name="q5" value="B"> B. The car is speeding up.</label>
+        <label class="option-label"><input type="radio" name="q5" value="C"> C. The car is moving at a constant speed.</label>
+        <label class="option-label"><input type="radio" name="q5" value="D"> D. The car is moving backwards.</label>
+      </div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question-card">
+      <div class="question-title">6. The diagram shows the vertical forces acting on a ball as it falls vertically through the air. The ball does not reach terminal velocity. Which row describes what happens to the resultant force on the ball and what happens to the acceleration of the ball as it falls through the air?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/FgsYW4P.jpeg" alt="Question 6 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q6" value="A"> A. Resultant force: decreases | Acceleration: decreases</label>
+        <label class="option-label"><input type="radio" name="q6" value="B"> B. Resultant force: decreases | Acceleration: increases</label>
+        <label class="option-label"><input type="radio" name="q6" value="C"> C. Resultant force: increases | Acceleration: decreases</label>
+        <label class="option-label"><input type="radio" name="q6" value="D"> D. Resultant force: increases | Acceleration: increases</label>
+      </div>
+    </div>
+
+    <!-- Q7 -->
+    <div class="question-card">
+      <div class="question-title">7. The diagram shows a drawbridge that is attached to a wall by a hinge at one end and a cable at the other. The drawbridge is in equilibrium. Which arrow shows a possible direction for the force at the hinge?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/KeYSj50.jpeg" alt="Question 7 Diagram 1" style="max-width: 100%; height: auto; border-radius: 6px; margin-bottom: 10px;">
+        <img src="https://i.imgur.com/VKlAt30.jpeg" alt="Question 7 Diagram 2" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q7" value="A"> A. Arrow A</label>
+        <label class="option-label"><input type="radio" name="q7" value="B"> B. Arrow B</label>
+        <label class="option-label"><input type="radio" name="q7" value="C"> C. Arrow C</label>
+        <label class="option-label"><input type="radio" name="q7" value="D"> D. Arrow D</label>
+      </div>
+    </div>
+
+    <!-- Q8 -->
+    <div class="question-card">
+      <div class="question-title">8. A train is travelling horizontally in a straight line. A book is on a table in the train. The diagram shows all the forces acting on the book. How is the train moving?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/t48oX5J.jpeg" alt="Question 8 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q8" value="A"> A. Accelerating to the left of the diagram</label>
+        <label class="option-label"><input type="radio" name="q8" value="B"> B. Accelerating to the right of the diagram</label>
+        <label class="option-label"><input type="radio" name="q8" value="C"> C. Moving at uniform speed to the left of the diagram</label>
+        <label class="option-label"><input type="radio" name="q8" value="D"> D. Moving at uniform speed to the right of the diagram</label>
+      </div>
+    </div>
+
+    <!-- Q9 -->
+    <div class="question-card">
+      <div class="question-title">9. A cart has a mass of 10 kg. A boy pushes on the cart horizontally with a force of 50 N. The cart accelerates at 0.50 m/s². What is the frictional force acting on the cart?</div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q9" value="A"> A. 5.0 N</label>
+        <label class="option-label"><input type="radio" name="q9" value="B"> B. 20 N</label>
+        <label class="option-label"><input type="radio" name="q9" value="C"> C. 30 N</label>
+        <label class="option-label"><input type="radio" name="q9" value="D"> D. 45 N</label>
+      </div>
+    </div>
+
+    <!-- Q10 -->
+    <div class="question-card">
+      <div class="question-title">10. A truck is towing a car along a straight horizontal road at a constant speed. The rope breaks. Which row gives the direction of the initial acceleration of the truck after the rope breaks and the reason for the acceleration?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/tQU1Ch6.jpeg" alt="Question 10 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q10" value="A"> A. Direction: Left | Reason: driving force > resistive forces</label>
+        <label class="option-label"><input type="radio" name="q10" value="B"> B. Direction: Left | Reason: driving force < resistive forces</label>
+        <label class="option-label"><input type="radio" name="q10" value="C"> C. Direction: Right | Reason: driving force > resistive forces</label>
+        <label class="option-label"><input type="radio" name="q10" value="D"> D. Direction: Right | Reason: driving force < resistive forces</label>
+      </div>
+    </div>
+
+    <!-- Q11 -->
+    <div class="question-card">
+      <div class="question-title">11. Each diagram shows three forces on a beam. In which situation is it possible for the three forces shown to be in equilibrium?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/P2YfopT.jpeg" alt="Question 11 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q11" value="A"> A. Situation A</label>
+        <label class="option-label"><input type="radio" name="q11" value="B"> B. Situation B</label>
+        <label class="option-label"><input type="radio" name="q11" value="C"> C. Situation C</label>
+        <label class="option-label"><input type="radio" name="q11" value="D"> D. Situation D</label>
+      </div>
+    </div>
+
+    <!-- Q12 -->
+    <div class="question-card">
+      <div class="question-title">12. The diagram shows three forces acting on an object. What is the value of the resultant force acting on the object?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/iNieqpD.jpeg" alt="Question 12 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q12" value="A"> A. 2 N</label>
+        <label class="option-label"><input type="radio" name="q12" value="B"> B. 10 N</label>
+        <label class="option-label"><input type="radio" name="q12" value="C"> C. 14 N</label>
+        <label class="option-label"><input type="radio" name="q12" value="D"> D. 16 N</label>
+      </div>
+    </div>
+
+    <!-- Q13 -->
+    <div class="question-card">
+      <div class="question-title">13. Two forces P and Q act on an object. Which diagram shows the resultant of these two forces?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/Jvaz3IU.jpeg" alt="Question 13 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q13" value="A"> A. Diagram A</label>
+        <label class="option-label"><input type="radio" name="q13" value="B"> B. Diagram B</label>
+        <label class="option-label"><input type="radio" name="q13" value="C"> C. Diagram C</label>
+        <label class="option-label"><input type="radio" name="q13" value="D"> D. Diagram D</label>
+      </div>
+    </div>
+
+    <!-- Q14 -->
+    <div class="question-card">
+      <div class="question-title">14. On the diagram shown, what is the magnitude of the resultant force of the two vectors?</div>
+      <div style="text-align: center; margin: 15px 0;">
+        <img src="https://i.imgur.com/6kj8mXs.jpeg" alt="Question 14 Diagram" style="max-width: 100%; height: auto; border-radius: 6px;">
+      </div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q14" value="A"> A. 2.0 N</label>
+        <label class="option-label"><input type="radio" name="q14" value="B"> B. 7.0 N</label>
+        <label class="option-label"><input type="radio" name="q14" value="C"> C. 10 N</label>
+        <label class="option-label"><input type="radio" name="q14" value="D"> D. 14 N</label>
+      </div>
+    </div>
+
+    <!-- Q15 -->
+    <div class="question-card">
+      <div class="question-title">15. An object decelerates from 25.0 m/s to 5.0 m/s in a time of 4.0 s. It has a mass of 50 kg. What is the resultant force on the object?</div>
+      <div class="options">
+        <label class="option-label"><input type="radio" name="q15" value="A"> A. 0.63 N</label>
+        <label class="option-label"><input type="radio" name="q15" value="B"> B. 10 N</label>
+        <label class="option-label"><input type="radio" name="q15" value="C"> C. 250 N</label>
+        <label class="option-label"><input type="radio" name="q15" value="D"> D. 4000 N</label>
+      </div>
+    </div>
+
+    <button type="button" class="btn-submit" id="submitBtn">Submit Answers & Start Learning</button>
+  </div>
+
+  <!-- STEP 3A: MATERI KELOMPOK 1 (ADVANCED LEVEL) -->
+  <div id="section-group1" class="page-section">
+    <div class="score-banner" id="banner-g1"></div>
+    <h2>Group 1: Advanced Learning Module</h2>
+    <div class="material-box">
+      <h3>🚀 Free Body Diagrams & Complex Force Analysis</h3>
+      <p>Welcome to the Advanced Level! You have demonstrated a strong fundamental understanding of forces and vector resultants.</p>
+      <h4>Key Learning Objectives:</h4>
+      <ul>
+        <li>Analyzing multi-body systems in non-equilibrium conditions.</li>
+        <li>Resolving force vectors into perpendicular components ($F_x$ and $F_y$).</li>
+        <li>Solving higher-order problem-solving tasks (HOTS) involving inclined planes and friction coefficients.</li>
+      </ul>
+      <p><strong>Next Task:</strong> Access your full interactive extension material on the Google Sites page below:</p>
+      <a href="https://sites.google.com/santa-laurensia.sch.id/physicscourse/home/forces/force-body-diagram/group-1?authuser=0" target="_blank" class="external-btn">Open Group 1 Page</a>
+    </div>
+  </div>
+
+  <!-- STEP 3B: MATERI KELOMPOK 2 (INTERMEDIATE LEVEL) -->
+  <div id="section-group2" class="page-section">
+    <div class="score-banner" id="banner-g2"></div>
+    <h2>Group 2: Intermediate Learning Module</h2>
+    <div class="material-box">
+      <h3>📘 Newton's Laws & Resultant Force Application</h3>
+      <p>Great job! You have a good grasp of the basic concepts, but need further practice in applying Newton's 2nd Law ($F_{net} = ma$) and vector combinations.</p>
+      <h4>Key Learning Objectives:</h4>
+      <ul>
+        <li>Identifying action-reaction pairs according to Newton's 3rd Law.</li>
+        <li>Calculating friction and resistive forces in moving objects.</li>
+        <li>Constructing standard Free Body Diagrams for balanced and unbalanced forces.</li>
+      </ul>
+      <p><strong>Next Task:</strong> Access your full guided worksheet and exercises below:</p>
+      <a href="https://sites.google.com/santa-laurensia.sch.id/physicscourse/home/forces/force-body-diagram/group-2?authuser=0" target="_blank" class="external-btn">Open Group 2 Page</a>
+    </div>
+  </div>
+
+  <!-- STEP 3C: MATERI KELOMPOK 3 (BASIC LEVEL) -->
+  <div id="section-group3" class="page-section">
+    <div class="score-banner" id="banner-g3"></div>
+    <h2>Group 3: Foundation Learning Module</h2>
+    <div class="material-box">
+      <h3>🌱 Fundamentals of Forces & Equilibrium</h3>
+      <p>Welcome! We will focus on building a strong foundation in force concepts, direction, and basic vector arithmetic.</p>
+      <h4>Key Learning Objectives:</h4>
+      <ul>
+        <li>Understanding contact vs. non-contact forces (Weight, Normal Force, Tension, Friction).</li>
+        <li>Determining whether an object is in equilibrium ($\Sigma F = 0$).</li>
+        <li>Drawing simple force vectors with correct direction and magnitude.</li>
+      </ul>
+      <p><strong>Next Task:</strong> Access your foundational learning guide and video explanations below:</p>
+      <a href="https://sites.google.com/santa-laurensia.sch.id/physicscourse/home/forces/force-body-diagram/group-3?authuser=0" target="_blank" class="external-btn">Open Group 3 Page</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentStudentName = "";
+
+  const answerKey = {
+    q1: 'A', q2: 'D', q3: 'D', q4: 'C', q5: 'B',
+    q6: 'A', q7: 'D', q8: 'B', q9: 'D', q10: 'C',
+    q11: 'D', q12: 'B', q13: 'C', q14: 'C', q15: 'C'
+  };
+
+  const appScriptUrl = "https://script.google.com/macros/s/AKfycbwzWB2hwHdaXkVeuxXbsSVXSb0Crn5H9v7NOaXUmYW_xZeN3IVnJGhfAndZHqLjtIBb5g/exec";
+
+  // Handler Tombol Start Registration
+  document.getElementById('startBtn').addEventListener('click', function() {
+    const nameInput = document.getElementById('studentName').value.trim();
+    if (nameInput === "") {
+      alert("Please enter your full name first!");
+      return;
+    }
+    currentStudentName = nameInput;
+    document.getElementById('section-register').classList.remove('active-section');
+    document.getElementById('section-quiz').classList.add('active-section');
+  });
+
+  // Handler Tombol Submit Quiz
+  document.getElementById('submitBtn').addEventListener('click', function() {
+    let score = 0;
+    const totalQuestions = 15;
+
+    for (let i = 1; i <= totalQuestions; i++) {
+      const qName = 'q' + i;
+      const selectedOption = document.querySelector(`input[name="${qName}"]:checked`);
+      if (selectedOption && selectedOption.value === answerKey[qName]) {
+        score++;
+      }
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Submitting Data...";
+
+    let groupName = "";
+    let targetSectionId = "";
+    let bannerId = "";
+
+    if (score > 10) {
+      groupName = "Group 1 (Advanced)";
+      targetSectionId = "section-group1";
+      bannerId = "banner-g1";
+    } else if (score >= 5 && score <= 10) {
+      groupName = "Group 2 (Intermediate)";
+      targetSectionId = "section-group2";
+      bannerId = "banner-g2";
+    } else {
+      groupName = "Group 3 (Basic)";
+      targetSectionId = "section-group3";
+      bannerId = "banner-g3";
+    }
+
+    // 1. Pengiriman Data ke Google Sheets (Di Luar Layar)
+    const formData = new URLSearchParams();
+    formData.append("nama", currentStudentName);
+    formData.append("skor", score);
+    formData.append("totalSoal", totalQuestions);
+    formData.append("kelompok", groupName);
+
+    fetch(appScriptUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: formData.toString()
+    }).then(() => {
+      console.log("Data submitted successfully!");
+    }).catch((error) => {
+      console.error("Submission Error: ", error);
+    });
+
+    // 2. Transisi Halaman Secara Langsung (SPA)
+    document.getElementById(bannerId).innerText = `Hello ${currentStudentName}! Your Score: ${score} / ${totalQuestions} (${groupName})`;
+    document.getElementById('section-quiz').classList.remove('active-section');
+    document.getElementById(targetSectionId).classList.add('active-section');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>
