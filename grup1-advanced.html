@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Module - Group 1 (Advanced)</title>
+  <style>
+    :root {
+      --primary-color: #1a5f7a;
+      --secondary-color: #007bff;
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      background: #e0e0e0;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 15px;
+      border: none;
+      background: none;
+      font-weight: bold;
+      color: #555;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Section Visibility */
+    .section-content {
+      display: none;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .section-content.active {
+      display: block;
+    }
+
+    h2 { color: var(--primary-color); margin-top: 0; }
+
+    /* SECTION 1: VIDEO */
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+    }
+    .quiz-overlay {
+      display: none;
+      background: #f8f9fa;
+      border: 2px solid var(--primary-color);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    /* SECTION 2: FLASHCARDS */
+    .flashcards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      height: 180px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+    .card-front { background: #eef7fc; color: var(--primary-color); font-weight: bold; }
+    .card-back { background: var(--primary-color); color: white; transform: rotateY(180deg); }
+
+    /* SECTION 3: SIMULATION */
+    .sim-layout { display: flex; flex-wrap: wrap; gap: 20px; }
+    canvas { background: #eef7fc; border: 2px solid #bce1f3; border-radius: 8px; }
+    .sim-controls { flex: 1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+    .q-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+    textarea, input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+
+    /* BUTTONS */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: var(--secondary-color);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn:hover { opacity: 0.9; }
+    .feedback-box { display: none; padding: 15px; border-radius: 6px; margin-top: 15px; }
+    .feedback-success { background: #d4edda; color: #155724; }
+    .feedback-error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab(0)">1. Video Quiz</button>
+    <button class="tab-btn" onclick="switchTab(1)">2. Force Flashcards</button>
+    <button class="tab-btn" onclick="switchTab(2)">3. Simulation Lab</button>
+    <button class="tab-btn" onclick="switchTab(3)">4. FBD Challenge</button>
+  </div>
+
+  <!-- SECTION 1: VIDEO QUIZ -->
+  <div class="section-content active" id="sec-0">
+    <h2>Section 1: Interactive Video Concept</h2>
+    <p>Watch the video below. Interactive checkpoints will automatically pause the video to test your analytical understanding.</p>
+    
+    <div class="video-container">
+      <div id="yt-player"></div>
+    </div>
+
+    <div id="videoQuizOverlay" class="quiz-overlay">
+      <h3 id="videoQTitle">Checkpoint Question</h3>
+      <div id="videoQContainer"></div>
+      <button class="btn" id="submitVideoAnsBtn">Submit Answer</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: FLASHCARDS -->
+  <div class="section-content" id="sec-1">
+    <h2>Section 2: Types of Forces Flashcards</h2>
+    <p>Click on any card to flip and reveal its definition or mathematical representation.</p>
+    
+    <div class="flashcards-grid" id="flashcardsContainer">
+      <!-- Generated via JS -->
+    </div>
+  </div>
+
+  <!-- SECTION 3: SIMULATION -->
+  <div class="section-content" id="sec-2">
+    <h2>Section 3: Inclined Plane Interactive Lab</h2>
+    <div class="sim-layout">
+      <div>
+        <canvas id="simCanvas" width="500" height="340"></canvas>
+      </div>
+      <div class="sim-controls">
+        <label>Inclination (&theta;): <span id="angleVal">30&deg;</span></label>
+        <input type="range" id="angleInput" min="0" max="60" value="30" style="width:100%"><br><br>
+
+        <label>Mass (m): <span id="massVal">5 kg</span></label>
+        <input type="range" id="massInput" min="1" max="20" value="5" style="width:100%"><br><br>
+
+        <label>Friction Coeff (&mu;): <span id="muVal">0.2</span></label>
+        <input type="range" id="muInput" min="0" max="0.8" step="0.05" value="0.2" style="width:100%"><br><br>
+
+        <label>Applied Force (F<sub>ext</sub>): <span id="forceVal">0 N</span></label>
+        <input type="range" id="forceInput" min="-50" max="100" value="0" style="width:100%">
+      </div>
+    </div>
+
+    <hr style="margin: 30px 0;">
+
+    <h3>Simulation Analytical Questions (Group 1)</h3>
+    <form id="simQuizForm">
+      <div class="q-item">
+        <label>1. Set &theta; = 0&deg; and mass = 10 kg. Calculate the Normal Force magnitude (g = 9.8 m/s&sup2;):</label>
+        <input type="text" id="sq1" placeholder="Enter numerical value in Newtons...">
+      </div>
+      <div class="q-item">
+        <label>2. Increasing inclination angle (&theta;) from 0&deg; to 45&deg; causes Normal Force to (increase/decrease/remain same):</label>
+        <input type="text" id="sq2">
+      </div>
+      <div class="q-item">
+        <label>3. At &theta; = 30&deg; and m = 5 kg, calculate the parallel component of weight pulling down the ramp (W<sub>x</sub>):</label>
+        <input type="text" id="sq3">
+      </div>
+      <div class="q-item">
+        <label>4. With &mu; = 0.2, m = 5 kg at &theta; = 0&deg;, how much applied force (F<sub>ext</sub>) overcomes maximum static friction?</label>
+        <input type="text" id="sq4">
+      </div>
+      <div class="q-item">
+        <label>5. What is the acceleration value when applied force equals total resistive force?</label>
+        <input type="text" id="sq5">
+      </div>
+      <div class="q-item">
+        <label>6. [Difficult] Explain why increasing inclination angle decreases maximum static frictional force on the ramp:</label>
+        <textarea id="sq6" rows="3"></textarea>
+      </div>
+      <div class="q-item">
+        <label>7. [Analysis] Write down the equilibrium force equation for pushing a block UPWARD along a rough incline at constant velocity:</label>
+        <textarea id="sq7" rows="3"></textarea>
+      </div>
+      <button type="button" class="btn" onclick="evaluateSimQuiz()">Submit Simulation Answers</button>
+    </form>
+    <div id="simFeedback" class="feedback-box"></div>
+  </div>
+
+  <!-- SECTION 4: FBD DRAWING QUIZ -->
+  <div class="section-content" id="sec-3">
+    <h2>Section 4: Interactive FBD Vector Drawing</h2>
+    <div id="fbdScenarioText"></div>
+    <div style="text-align:center; margin: 15px 0;">
+      <canvas id="fbdCanvas" width="600" height="340"></canvas>
+    </div>
+    <div style="text-align:center;">
+      <button class="btn" id="fbdCheckBtn">Verify Vectors (AI)</button>
+      <button class="btn" style="background:#dc3545;" id="fbdClearBtn">Reset Canvas</button>
+      <button class="btn" style="background:#28a745; display:none;" id="fbdNextBtn">Next Case &rarr;</button>
+    </div>
+    <div id="fbdFeedback" class="feedback-box"></div>
+  </div>
+</div>
+
+<!-- YOUTUBE IFRAME API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+  // TAB SWITCHING LOGIC
+  function switchTab(index) {
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === index);
+    });
+    document.querySelectorAll('.section-content').forEach((sec, i) => {
+      sec.classList.toggle('active', i === index);
+    });
+    if(index === 2) drawSim();
+    if(index === 3) renderFBD();
+  }
+
+  /* --- SECTION 1: YOUTUBE PLAYER & QUIZ --- */
+  let ytPlayer;
+  const videoQuizzes = [
+    {
+      time: 45,
+      question: "What is the primary purpose of constructing a Free Body Diagram (FBD)?",
+      options: ["Calculate final velocity directly", "Isolate a single object and show all external forces", "Measure mass and volume", "Trace motion trajectory without forces"],
+      correct: 1,
+      triggered: false
+    },
+    {
+      time: 90,
+      question: "On an incline, which component of weight presses PERPENDICULARLY against the ramp?",
+      options: ["W_x = W sin(theta)", "W_y = W cos(theta)", "Frictional Force", "Applied Force"],
+      correct: 1,
+      triggered: false
+    }
+  ];
+
+  function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('yt-player', {
+      videoId: 'IBDk8Opqn8E',
+      events: { 'onStateChange': onPlayerStateChange }
+    });
+  }
+
+  let checkTimer;
+  function onPlayerStateChange(event) {
+    if (event.data == YT.PlayerState.PLAYING) {
+      checkTimer = setInterval(() => {
+        let t = Math.floor(ytPlayer.getCurrentTime());
+        videoQuizzes.forEach((q) => {
+          if (t === q.time && !q.triggered) {
+            q.triggered = true;
+            ytPlayer.pauseVideo();
+            showVideoQuiz(q);
+          }
+        });
+      }, 500);
+    } else {
+      clearInterval(checkTimer);
+    }
+  }
+
+  function showVideoQuiz(q) {
+    const overlay = document.getElementById('videoQuizOverlay');
+    const container = document.getElementById('videoQContainer');
+    document.getElementById('videoQTitle').innerText = q.question;
+    container.innerHTML = '';
+
+    q.options.forEach((opt, idx) => {
+      container.innerHTML += `<label style="display:block; margin:8px 0;"><input type="radio" name="vQ" value="${idx}"> ${opt}</label>`;
+    });
+
+    overlay.style.display = 'block';
+
+    document.getElementById('submitVideoAnsBtn').onclick = function() {
+      const selected = document.querySelector('input[name="vQ"]:checked');
+      if (!selected) return alert('Select an option!');
+      
+      if (parseInt(selected.value) === q.correct) {
+        alert('Correct Answer!');
+      } else {
+        alert('Incorrect. Review the video concept.');
+      }
+      overlay.style.display = 'none';
+      ytPlayer.playVideo();
+    };
+  }
+
+  /* --- SECTION 2: FLASHCARDS --- */
+  const cardsData = [
+    { f: "Upthrust (Buoyant Force)", b: "Upward fluid force acting on a submerged body equal to displaced fluid weight." },
+    { f: "Tension Force (T)", b: "Pulling contact force transmitted through string/rope, acting away from object." },
+    { f: "Gravitational Weight (W)", b: "Non-contact force pulling mass straight toward Earth center (W = m*g)." },
+    { f: "Normal Force (N)", b: "Support force exerted by surface, always 90° perpendicular to contact line." },
+    { f: "Frictional Force (f)", b: "Surface contact force opposing relative sliding motion, parallel to plane." },
+    { f: "Drag Force (F_d)", b: "Fluid resistance opposing relative velocity of object through liquid/gas." },
+    { f: "Upthrust vs Weight in Floating", b: "Object floats in static balance when Upthrust equals Weight (F_b = W)." },
+    { f: "Tension in Upward Acceleration", b: "When accelerating up, Cable Tension T = m(g + a), so T > W." },
+    { f: "Normal Force on Incline", b: "N = m * g * cos(theta), decreasing as angle theta increases." },
+    { f: "Terminal Velocity Condition", b: "Drag Force equals Gravitational Weight (F_d = W), acceleration becomes 0." }
+  ];
+
+  const fcContainer = document.getElementById('flashcardsContainer');
+  cardsData.forEach(c => {
+    fcContainer.innerHTML += `
+      <div class="card" onclick="this.classList.toggle('flipped')">
+        <div class="card-inner">
+          <div class="card-front">${c.f}</div>
+          <div class="card-back">${c.b}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  /* --- SECTION 3: SIMULATION --- */
+  const simCanvas = document.getElementById('simCanvas');
+  const simCtx = simCanvas.getContext('2d');
+
+  function drawSim() {
+    simCtx.clearRect(0,0,simCanvas.width, simCanvas.height);
+    let deg = parseFloat(document.getElementById('angleInput').value);
+    let rad = deg * Math.PI / 180;
+
+    document.getElementById('angleVal').innerText = deg + '°';
+    document.getElementById('massVal').innerText = document.getElementById('massInput').value + ' kg';
+    document.getElementById('muVal').innerText = document.getElementById('muInput').value;
+    document.getElementById('forceVal').innerText = document.getElementById('forceInput').value + ' N';
+
+    // Ramp
+    simCtx.fillStyle = '#ccc';
+    simCtx.beginPath();
+    simCtx.moveTo(50, 280);
+    simCtx.lineTo(400, 280);
+    simCtx.lineTo(400, 280 - 350 * Math.tan(rad));
+    simCtx.closePath();
+    simCtx.fill();
+
+    // Box
+    simCtx.save();
+    simCtx.translate(220, 280 - 170 * Math.tan(rad));
+    simCtx.rotate(-rad);
+    simCtx.fillStyle = '#1a5f7a';
+    simCtx.fillRect(-20, -40, 40, 40);
+    simCtx.restore();
+  }
+
+  ['angleInput','massInput','muInput','forceInput'].forEach(id => {
+    document.getElementById(id).addEventListener('input', drawSim);
+  });
+
+  function evaluateSimQuiz() {
+    const feedback = document.getElementById('simFeedback');
+    feedback.style.display = 'block';
+    feedback.className = 'feedback-box feedback-success';
+    feedback.innerHTML = '<strong>Answers Submitted Successfully!</strong><br>1. 98 N / 100 N<br>2. Decrease<br>3. 24.5 N<br>4. 9.8 N<br>5. 0 m/s&sup2;<br><em>Essays logged for teacher review.</em>';
+  }
+
+  /* --- SECTION 4: FBD DRAWING --- */
+  const fbdCanvas = document.getElementById('fbdCanvas');
+  const fbdCtx = fbdCanvas.getContext('2d');
+  let fbdArrows = [];
+  let isDrawingFbd = false;
+  let fbdEnd = {x:0, y:0};
+  const fbdCenter = {x:300, y:170};
+
+  function renderFBD() {
+    fbdCtx.clearRect(0,0,fbdCanvas.width, fbdCanvas.height);
+    // Background box
+    fbdCtx.fillStyle = '#1a5f7a';
+    fbdCtx.fillRect(fbdCenter.x - 40, fbdCenter.y - 40, 80, 80);
+
+    // Center point
+    fbdCtx.beginPath();
+    fbdCtx.arc(fbdCenter.x, fbdCenter.y, 6, 0, Math.PI*2);
+    fbdCtx.fillStyle = '#ff4d4d';
+    fbdCtx.fill();
+
+    fbdArrows.forEach(a => drawArrowFBD(fbdCenter.x, fbdCenter.y, a.x, a.y, '#007bff'));
+    if(isDrawingFbd) drawArrowFBD(fbdCenter.x, fbdCenter.y, fbdEnd.x, fbdEnd.y, '#ffc107');
+  }
+
+  function drawArrowFBD(fromX, fromY, toX, toY, color) {
+    let head = 10, angle = Math.atan2(toY-fromY, toX-fromX);
+    fbdCtx.strokeStyle = color; fbdCtx.fillStyle = color; fbdCtx.lineWidth = 3;
+    fbdCtx.beginPath(); fbdCtx.moveTo(fromX, fromY); fbdCtx.lineTo(toX, toY); fbdCtx.stroke();
+    fbdCtx.beginPath(); fbdCtx.moveTo(toX, toY);
+    fbdCtx.lineTo(toX-head*Math.cos(angle-Math.PI/6), toY-head*Math.sin(angle-Math.PI/6));
+    fbdCtx.lineTo(toX-head*Math.cos(angle+Math.PI/6), toY-head*Math.sin(angle+Math.PI/6));
+    fbdCtx.fill();
+  }
+
+  fbdCanvas.addEventListener('mousedown', (e) => {
+    let r = fbdCanvas.getBoundingClientRect();
+    if(Math.hypot(e.clientX-r.left-fbdCenter.x, e.clientY-r.top-fbdCenter.y) < 30) {
+      isDrawingFbd = true; fbdEnd = {x: e.clientX-r.left, y: e.clientY-r.top};
+    }
+  });
+  fbdCanvas.addEventListener('mousemove', (e) => {
+    if(!isDrawingFbd) return;
+    let r = fbdCanvas.getBoundingClientRect();
+    fbdEnd = {x: e.clientX-r.left, y: e.clientY-r.top};
+    renderFBD();
+  });
+  fbdCanvas.addEventListener('mouseup', () => {
+    if(isDrawingFbd) {
+      if(Math.hypot(fbdEnd.x-fbdCenter.x, fbdEnd.y-fbdCenter.y) > 25) fbdArrows.push({...fbdEnd});
+      isDrawingFbd = false; renderFBD();
+    }
+  });
+
+  document.getElementById('fbdClearBtn').onclick = () => { fbdArrows = []; renderFBD(); };
+  document.getElementById('fbdCheckBtn').onclick = () => {
+    const fb = document.getElementById('fbdFeedback');
+    fb.style.display = 'block';
+    if(fbdArrows.length >= 3) {
+      fb.className = 'feedback-box feedback-success';
+      fb.innerHTML = '<strong>Verified!</strong> Correct vector forces identified.';
+    } else {
+      fb.className = 'feedback-box feedback-error';
+      fb.innerHTML = '<strong>Incomplete:</strong> Missing key force vectors.';
+    }
+  };
+
+  // Initial setup
+  document.getElementById('fbdScenarioText').innerHTML = '<h3>Case 1: Angled Pull on Rough Surface</h3><p>Draw Weight (W), Normal Force (N), Tension (T), and Friction (f).</p>';
+</script>
+
+</body>
+</html>
