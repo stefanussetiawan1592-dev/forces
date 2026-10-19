@@ -130,12 +130,16 @@
     .external-btn {
       display: inline-block;
       margin-top: 15px;
-      padding: 10px 20px;
+      padding: 12px 24px;
       background-color: #28a745;
       color: white;
       text-decoration: none;
       border-radius: 6px;
       font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    .external-btn:hover {
+      background-color: #218838;
     }
   </style>
 </head>
@@ -285,9 +289,9 @@
       </div>
       <div class="options">
         <label class="option-label"><input type="radio" name="q10" value="A"> A. Direction: Left | Reason: driving force > resistive forces</label>
-        <label class="option-label"><input type="radio" name="q10" value="B"> B. Direction: Left | Reason: driving force < resistive forces</label>
+        <label class="option-label"><input type="radio" name="q10" value="B"> B. Direction: Left | Reason: driving force &lt; resistive forces</label>
         <label class="option-label"><input type="radio" name="q10" value="C"> C. Direction: Right | Reason: driving force > resistive forces</label>
-        <label class="option-label"><input type="radio" name="q10" value="D"> D. Direction: Right | Reason: driving force < resistive forces</label>
+        <label class="option-label"><input type="radio" name="q10" value="D"> D. Direction: Right | Reason: driving force &lt; resistive forces</label>
       </div>
     </div>
 
@@ -371,11 +375,11 @@
       <h4>Key Learning Objectives:</h4>
       <ul>
         <li>Analyzing multi-body systems in non-equilibrium conditions.</li>
-        <li>Resolving force vectors into perpendicular components ($F_x$ and $F_y$).</li>
+        <li>Resolving force vectors into perpendicular components (F<sub>x</sub> and F<sub>y</sub>).</li>
         <li>Solving higher-order problem-solving tasks (HOTS) involving inclined planes and friction coefficients.</li>
       </ul>
-      <p><strong>Next Task:</strong> Access your full interactive extension material on the GitHub Pages below:</p>
-      <a href="https://stefanussetiawan1592-dev.github.io/forces/grup1" class="external-btn">Open Group 1 Page</a>
+      <p><strong>Next Task:</strong> Access your full interactive extension material on GitHub Pages below:</p>
+      <a href="https://stefanussetiawan1592-dev.github.io/forces/grup1" class="external-btn">Open Group 1 Page &rarr;</a>
     </div>
   </div>
 
@@ -385,7 +389,7 @@
     <h2>Group 2: Intermediate Learning Module</h2>
     <div class="material-box">
       <h3>📘 Newton's Laws & Resultant Force Application</h3>
-      <p>Great job! You have a good grasp of the basic concepts, but need further practice in applying Newton's 2nd Law ($F_{net} = ma$) and vector combinations.</p>
+      <p>Great job! You have a good grasp of the basic concepts, but need further practice in applying Newton's 2nd Law (F<sub>net</sub> = m &middot; a) and vector combinations.</p>
       <h4>Key Learning Objectives:</h4>
       <ul>
         <li>Identifying action-reaction pairs according to Newton's 3rd Law.</li>
@@ -393,7 +397,7 @@
         <li>Constructing standard Free Body Diagrams for balanced and unbalanced forces.</li>
       </ul>
       <p><strong>Next Task:</strong> Access your full guided worksheet and exercises below:</p>
-      <a href="https://stefanussetiawan1592-dev.github.io/forces/grup2" class="external-btn">Open Group 2 Page</a>
+      <a href="https://stefanussetiawan1592-dev.github.io/forces/grup2" class="external-btn">Open Group 2 Page &rarr;</a>
     </div>
   </div>
 
@@ -407,11 +411,11 @@
       <h4>Key Learning Objectives:</h4>
       <ul>
         <li>Understanding contact vs. non-contact forces (Weight, Normal Force, Tension, Friction).</li>
-        <li>Determining whether an object is in equilibrium ($\Sigma F = 0$).</li>
+        <li>Determining whether an object is in equilibrium (&Sigma;F = 0).</li>
         <li>Drawing simple force vectors with correct direction and magnitude.</li>
       </ul>
       <p><strong>Next Task:</strong> Access your foundational learning guide and video explanations below:</p>
-      <a href="https://stefanussetiawan1592-dev.github.io/forces/grup3" class="external-btn">Open Group 3 Page</a>
+      <a href="https://stefanussetiawan1592-dev.github.io/forces/grup3" class="external-btn">Open Group 3 Page &rarr;</a>
     </div>
   </div>
 
@@ -436,7 +440,6 @@
       return;
     }
     currentStudentName = nameInput;
-    // Simpan Nama ke LocalStorage agar halaman modul grup bisa membacanya tanpa minta nama ulang
     localStorage.setItem("studentName", nameInput);
 
     document.getElementById('section-register').classList.remove('active-section');
@@ -463,51 +466,46 @@
     let groupName = "";
     let targetSectionId = "";
     let bannerId = "";
-    let redirectUrl = "";
 
     if (score > 10) {
-      groupName = "Group 1 (Advanced)";
+      groupName = "grup1";
       targetSectionId = "section-group1";
       bannerId = "banner-g1";
-      redirectUrl = "https://stefanussetiawan1592-dev.github.io/forces/grup1";
     } else if (score >= 5 && score <= 10) {
-      groupName = "Group 2 (Intermediate)";
+      groupName = "grup2";
       targetSectionId = "section-group2";
       bannerId = "banner-g2";
-      redirectUrl = "https://stefanussetiawan1592-dev.github.io/forces/grup2";
     } else {
-      groupName = "Group 3 (Basic)";
+      groupName = "grup3";
       targetSectionId = "section-group3";
       bannerId = "banner-g3";
-      redirectUrl = "https://stefanussetiawan1592-dev.github.io/forces/grup3";
     }
 
-    // Simpan informasi grup ke LocalStorage
     localStorage.setItem("assignedGroup", groupName);
 
-    // 1. Pengiriman Data ke Google Sheets (Di Luar Layar)
-    const formData = new URLSearchParams();
-    formData.append("nama", currentStudentName);
-    formData.append("skor", score);
-    formData.append("totalSoal", totalQuestions);
-    formData.append("kelompok", groupName);
-    formData.append("sheetTarget", "diagnostic");
+    // Pengiriman Data JSON ke Google Sheets (Tab 'diagnostic')
+    const payload = {
+      sheetTarget: "diagnostic",
+      studentName: currentStudentName,
+      score: score,
+      assignedGroup: groupName
+    };
 
     fetch(appScriptUrl, {
       method: "POST",
       mode: "no-cors",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/json"
       },
-      body: formData.toString()
+      body: JSON.stringify(payload)
     }).then(() => {
-      console.log("Data submitted successfully!");
+      console.log("Diagnostic data sent to Sheets successfully!");
     }).catch((error) => {
       console.error("Submission Error: ", error);
     });
 
-    // 2. Transisi Halaman Secara Langsung (SPA Display)
-    document.getElementById(bannerId).innerText = `Hello ${currentStudentName}! Your Score: ${score} / ${totalQuestions} (${groupName})`;
+    // Transisi Halaman SPA
+    document.getElementById(bannerId).innerText = `Hello ${currentStudentName}! Your Score: ${score} / ${totalQuestions} (${groupName.toUpperCase()})`;
     document.getElementById('section-quiz').classList.remove('active-section');
     document.getElementById(targetSectionId).classList.add('active-section');
 
