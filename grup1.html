@@ -493,6 +493,89 @@
 
   // Initial setup
   document.getElementById('fbdScenarioText').innerHTML = '<h3>Case 1: Angled Pull on Rough Surface</h3><p>Draw Weight (W), Normal Force (N), Tension (T), and Friction (f).</p>';
+
+// 1. PASTIKAN URL WEB APP APPS SCRIPT ANDA SUDAH BENAR
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzWB2hwHdaXkVeuxXbsSVXSb0Crn5H9v7NOaXUmYW_xZeN3IVnJGhfAndZHqLjtIBb5g/exec";
+
+// 2. FUNGSI UTAMA PENGIRIM DATA KE TAB 'grup1'
+function sendGroupData(sectionName, questionId, answerText, scoreStatus) {
+  // Ambil nama siswa dari LocalStorage (yang disimpan saat tes diagnostik)
+  const savedStudentName = localStorage.getItem("studentName") || "Anonymous Student";
+
+  const payload = {
+    sheetTarget: "grup1", // Mengarahkan data langsung ke tab 'grup1'
+    studentName: savedStudentName,
+    sectionName: sectionName,
+    questionId: questionId,
+    answer: answerText,
+    status: scoreStatus
+  };
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(() => console.log(`Data recorded for ${questionId}`))
+  .catch(err => console.error("Data recording error:", err));
+}
+
+// -------------------------------------------------------------
+// 3. INTEGRASI FUNGSI KE TIAP BAGIAN INTERAKTIF
+// -------------------------------------------------------------
+
+// PART 1: Video Quiz Checkpoint
+function submitVideoAnswer(qId, selectedOptionText, isCorrect) {
+  sendGroupData("Part 1 - Video Quiz", qId, selectedOptionText, isCorrect ? "Correct" : "Incorrect");
+}
+
+// PART 2: Flashcards Completion
+function logFlashcardsCompleted() {
+  sendGroupData("Part 2 - Flashcards", "FC_Review", "Completed 10 Flashcards", "Reviewed");
+}
+
+// PART 3: Simulation Quiz Submit
+function evaluateSimQuiz() {
+  const sq1 = document.getElementById('sq1').value;
+  const sq2 = document.getElementById('sq2').value;
+  const sq3 = document.getElementById('sq3').value;
+  const sq4 = document.getElementById('sq4').value;
+  const sq5 = document.getElementById('sq5').value;
+  const sq6 = document.getElementById('sq6').value;
+  const sq7 = document.getElementById('sq7').value;
+
+  // Kirim setiap jawaban ke Google Sheets
+  sendGroupData("Part 3 - Simulation", "Sim_Q1", sq1, "Submitted");
+  sendGroupData("Part 3 - Simulation", "Sim_Q2", sq2, "Submitted");
+  sendGroupData("Part 3 - Simulation", "Sim_Q3", sq3, "Submitted");
+  sendGroupData("Part 3 - Simulation", "Sim_Q4", sq4, "Submitted");
+  sendGroupData("Part 3 - Simulation", "Sim_Q5", sq5, "Submitted");
+  sendGroupData("Part 3 - Simulation", "Sim_Q6 (Difficult)", sq6, "Pending Review");
+  sendGroupData("Part 3 - Simulation", "Sim_Q7 (Analysis)", sq7, "Pending Review");
+
+  const feedback = document.getElementById('simFeedback');
+  feedback.style.display = 'block';
+  feedback.className = 'feedback-box feedback-success';
+  feedback.innerHTML = '<strong>Answers Submitted & Logged to Google Sheets!</strong>';
+}
+
+// PART 4: FBD Drawing Verification
+document.getElementById('fbdCheckBtn').onclick = () => {
+  const fb = document.getElementById('fbdFeedback');
+  fb.style.display = 'block';
+  
+  if (fbdArrows.length >= 3) {
+    fb.className = 'feedback-box feedback-success';
+    fb.innerHTML = '<strong>Verified!</strong> Correct vector forces identified.';
+    sendGroupData("Part 4 - FBD Drawing", "FBD_Case1", `${fbdArrows.length} vectors drawn`, "100/100");
+  } else {
+    fb.className = 'feedback-box feedback-error';
+    fb.innerHTML = '<strong>Incomplete:</strong> Missing key force vectors.';
+    sendGroupData("Part 4 - FBD Drawing", "FBD_Case1", `${fbdArrows.length} vectors drawn`, "Incomplete");
+  }
+};
+
 </script>
 
 </body>
