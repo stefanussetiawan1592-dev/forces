@@ -52,6 +52,13 @@
     <button class="tab-btn" onclick="switchTab(1)">2. Force Flashcards</button>
     <button class="tab-btn" onclick="switchTab(2)">3. Simulation Lab</button>
     <button class="tab-btn" onclick="switchTab(3)">4. FBD Challenge</button>
+    <!-- REFLECTION BUTTON -->
+  <hr style="margin: 40px 0;">
+  <div style="text-align: center; padding: 20px; background: #eef7fc; border-radius: 10px;">
+    <h3>Akhiri Sesi Pembelajaran</h3>
+    <p>Pastikan Anda telah menyelesaikan Concept Check (Bagian 2), Lab Simulation (Bagian 3), dan FBD Challenge (Bagian 4).</p>
+    <button class="btn" id="reflectionBtn" style="background: #6f42c1; font-size: 1.1em; padding: 12px 25px;">Proceed to Reflection</button>
+  </div>
   </div>
 
   <!-- SECTION 1: VIDEO QUIZ -->
@@ -111,17 +118,22 @@
         <canvas id="simCanvas" width="500" height="340"></canvas>
       </div>
       <div class="sim-controls">
+        <h4 style="color:var(--primary-color); margin-top:0;">Acceleration (a): <span id="accelDisplay" style="color:#dc3545;">0.00</span> m/s&sup2;</h4>
+        
         <label>Inclination (&theta;): <span id="angleVal">30&deg;</span></label>
-        <input type="range" id="angleInput" min="0" max="60" value="30" style="width:100%"><br><br>
+        <input type="range" id="angleInput" min="0" max="60" value="30" style="width:100%"><br>
 
         <label>Mass (m): <span id="massVal">5 kg</span></label>
-        <input type="range" id="massInput" min="1" max="20" value="5" style="width:100%"><br><br>
+        <input type="range" id="massInput" min="1" max="20" value="5" style="width:100%"><br>
 
         <label>Friction Coeff (&mu;): <span id="muVal">0.2</span></label>
-        <input type="range" id="muInput" min="0" max="0.8" step="0.05" value="0.2" style="width:100%"><br><br>
+        <input type="range" id="muInput" min="0" max="0.8" step="0.05" value="0.2" style="width:100%"><br>
 
         <label>Applied Force (F<sub>ext</sub>): <span id="forceVal">0 N</span></label>
-        <input type="range" id="forceInput" min="-50" max="100" value="0" style="width:100%"><br><br>
+        <input type="range" id="forceInput" min="-50" max="100" value="0" style="width:100%"><br>
+
+        <label>Force Angle (&phi; from plane): <span id="fAngleVal">0&deg;</span></label>
+        <input type="range" id="fAngleInput" min="-90" max="90" value="0" style="width:100%"><br><br>
 
         <button class="btn" id="simStartBtn" style="width:100%; background:#28a745;">▶ START ANIMATION</button>
         <button class="btn" id="simResetBtn" style="width:100%; background:#dc3545;">↺ RESET POS</button>
@@ -166,6 +178,32 @@
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+  let completionStatus = { part2: false, part3: false, part4: false };
+
+  document.getElementById('reflectionBtn').onclick = () => {
+    if (completionStatus.part2 && completionStatus.part3 && completionStatus.part4) {
+      window.location.href = "https://stefanussetiawan1592-dev.github.io/forces/reflection";
+    } else {
+      let missing = [];
+      if (!completionStatus.part2) missing.push("Part 2 (Concept Check)");
+      if (!completionStatus.part3) missing.push("Part 3 (Simulation Lab)");
+      if (!completionStatus.part4) missing.push("Part 4 (FBD Challenge)");
+      alert("Peringatan: Anda belum menyelesaikan bagian berikut:\n- " + missing.join("\n- ") + "\n\nSilakan lengkapi terlebih dahulu agar data observasi terekam dengan baik.");
+    }
+  };
+
+  // Modifikasi fungsi sendGroupData agar menggunakan async/await untuk mencegah data hilang (seperti di image_b6b8e6.png)
+  async function sendGroupDataAsync(sectionName, questionId, answer, status) {
+    const studentName = localStorage.getItem("studentName") || "Anonymous";
+    const payload = { sheetTarget: "grup1", studentName, sectionName, questionId, answer, status };
+    
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch(err) { console.log("Log error:", err); }
+  }
   // ==========================================
   // DATA LOGGER TO GOOGLE SHEETS
   // ==========================================
@@ -210,7 +248,7 @@
     {
       id: "Video_Q3", time: 150,
       type: "multiple",
-      question: "Which of the following forces act on an aircraft during steady, level flight? (Select ALL that apply)",
+      question: "Which of the following forces act on an aircraft during steady, level flight?",
       options: ["Weight (acting downwards)", "Lift (acting upwards)", "Thrust (pushing forward)", "Drag / Air Resistance (opposing forward motion)"],
       correct: [0, 1, 2, 3], // Semua opsi benar
       triggered: false
@@ -355,108 +393,135 @@
     ctx.font = "14px Arial"; ctx.fillText(label, toX + 5, toY + 5);
   }
 
-  function drawSim() {
+function drawSim() {
     simCtx.clearRect(0,0,simCanvas.width, simCanvas.height);
     let deg = parseFloat(document.getElementById('angleInput').value);
     let rad = deg * Math.PI / 180;
     let m = parseFloat(document.getElementById('massInput').value);
     let mu = parseFloat(document.getElementById('muInput').value);
     let Fext = parseFloat(document.getElementById('forceInput').value);
+    let Fdeg = parseFloat(document.getElementById('fAngleInput').value);
+    let Frad = Fdeg * Math.PI / 180;
 
     document.getElementById('angleVal').innerHTML = deg + '&deg;';
     document.getElementById('massVal').innerText = m + ' kg';
     document.getElementById('muVal').innerText = mu;
     document.getElementById('forceVal').innerText = Fext + ' N';
+    document.getElementById('fAngleVal').innerHTML = Fdeg + '&deg;';
 
-    // Calculation
     let g = 9.8;
     let W = m * g;
     let Wx = W * Math.sin(rad);
-    let N = W * Math.cos(rad);
-    let f_max = mu * N;
+    let Wy = W * Math.cos(rad);
     
+    // Komponen gaya dorong
+    let Fx = Fext * Math.cos(Frad); // Sejajar bidang
+    let Fy = Fext * Math.sin(Frad); // Tegak lurus bidang (menjauhi bidang jika positif)
+    
+    // Gaya Normal (Bisa berkurang jika ditarik ke atas)
+    let N = Wy - Fy; 
+    if (N < 0) N = 0; // Benda terangkat
+
+    let f_max = mu * N;
     let a = 0;
     let netForce = 0;
     let f_actual = 0;
 
     if (simIsRunning) {
-      let F_pull = Fext - Wx; // Pulling up the ramp
-      if (simBoxV > 0.1) { // Moving up
+      let F_pull = Fx - Wx; 
+      
+      if (N <= 0) {
+        // Jika terangkat, gaya gesek hilang
+        a = F_pull / m;
+      } else if (simBoxV > 0.1) { // Bergerak ke atas ramp
         f_actual = -f_max;
         netForce = F_pull + f_actual;
-      } else if (simBoxV < -0.1) { // Moving down
+        a = netForce / m;
+      } else if (simBoxV < -0.1) { // Bergerak ke bawah ramp
         f_actual = f_max;
         netForce = F_pull + f_actual;
-      } else { // Static
-        if (F_pull > f_max) { netForce = F_pull - f_max; f_actual = -f_max; }
-        else if (F_pull < -f_max) { netForce = F_pull + f_max; f_actual = f_max; }
-        else { netForce = 0; f_actual = -F_pull; }
+        a = netForce / m;
+      } else { // Diam
+        if (F_pull > f_max) { netForce = F_pull - f_max; f_actual = -f_max; a = netForce/m; }
+        else if (F_pull < -f_max) { netForce = F_pull + f_max; f_actual = f_max; a = netForce/m; }
+        else { netForce = 0; f_actual = -F_pull; a = 0; }
       }
-      a = netForce / m;
-      simBoxV += a * 0.05; // dt = 0.05
-      simBoxX += simBoxV * 0.5; // pixel scale
       
-      // Stop at edges
+      simBoxV += a * 0.05; 
+      simBoxX += simBoxV * 0.5; 
+      
       if(simBoxX < 0) { simBoxX = 0; simBoxV = 0; }
       if(simBoxX > 300) { simBoxX = 300; simBoxV = 0; }
     }
+
+    document.getElementById('accelDisplay').innerText = a.toFixed(2);
 
     // Draw Ramp
     simCtx.fillStyle = '#ccc';
     simCtx.beginPath(); simCtx.moveTo(50, 280); simCtx.lineTo(400, 280); simCtx.lineTo(400, 280 - 350 * Math.tan(rad)); simCtx.closePath(); simCtx.fill();
 
-    // Draw Box
+    // Base translations
+    let boxBaseX = 50 + simBoxX * Math.cos(rad);
+    let boxBaseY = 280 - simBoxX * Math.sin(rad);
+
     simCtx.save();
-    simCtx.translate(50 + simBoxX * Math.cos(rad), 280 - simBoxX * Math.sin(rad));
+    simCtx.translate(boxBaseX, boxBaseY);
     simCtx.rotate(-rad);
+    
+    // Draw Box (Bottom center is at 0,0 relative to translation)
     simCtx.fillStyle = '#1a5f7a'; simCtx.fillRect(-20, -40, 40, 40);
     
-    // Draw Vectors from Box Center (0, -20)
-    let cx = 0, cy = -20;
+    let cx = 0, cy = -20; // Center of box for vectors
     
-    // 1. Normal (Up perpendicular to ramp: y direction in rotated frame)
+    // 1. Normal (Tegak lurus ke atas dari pusat)
     if(N > 0) drawArrow(simCtx, cx, cy, cx, cy - Math.min(N, 100), '#28a745', 'N');
-    // 2. Weight (Straight down in absolute frame)
-    simCtx.restore(); // draw weight in unrotated frame
-    let absCx = 50 + simBoxX * Math.cos(rad);
-    let absCy = 280 - simBoxX * Math.sin(rad) - 20;
-    drawArrow(simCtx, absCx, absCy, absCx, absCy + Math.min(W, 100), '#dc3545', 'W');
+    
+    simCtx.restore(); // Restore untuk gambar Weight tegak lurus ke bawah global
+    
+    // 2. Weight (Ke bawah secara absolut)
+    drawArrow(simCtx, boxBaseX, boxBaseY - 20, boxBaseX, boxBaseY - 20 + Math.min(W, 100), '#dc3545', 'W');
     
     simCtx.save();
-    simCtx.translate(50 + simBoxX * Math.cos(rad), 280 - simBoxX * Math.sin(rad));
+    simCtx.translate(boxBaseX, boxBaseY);
     simCtx.rotate(-rad);
-    // 3. Fext (Parallel up ramp)
+
+    // 3. Fext (Memiliki sudut kemiringan Frad terhadap bidang)
     if(Fext !== 0) {
-      let fdir = Fext > 0 ? 1 : -1;
-      drawArrow(simCtx, cx, cy, cx + fdir*Math.min(Math.abs(Fext), 100), cy, '#007bff', 'F');
+      // Pusat rotasi panah F dari pusat kotak
+      let fEndx = cx + Math.min(Math.abs(Fext), 100) * Math.cos(Frad) * Math.sign(Fext);
+      let fEndy = cy - Math.min(Math.abs(Fext), 100) * Math.sin(Frad) * Math.sign(Fext);
+      drawArrow(simCtx, cx, cy, fEndx, fEndy, '#007bff', 'F');
     }
-    // 4. Friction (Parallel)
+    
+    // 4. Friction (Tepat di alas kotak / permukaan bidang)
     if(Math.abs(f_actual) > 0.1) {
-      let fdir = f_actual > 0 ? 1 : -1; // Positive f_actual means pointing UP ramp
-      drawArrow(simCtx, cx, cy+15, cx + fdir*Math.min(Math.abs(f_actual), 80), cy+15, '#ffc107', 'f');
+      let fdir = f_actual > 0 ? 1 : -1; 
+      // Gambar panah f di y = 0 (tepat di garis singgung permukaan)
+      drawArrow(simCtx, cx, 0, cx + fdir * Math.min(Math.abs(f_actual), 80), 0, '#ffc107', 'f');
     }
     simCtx.restore();
 
     if(simIsRunning) animId = requestAnimationFrame(drawSim);
   }
 
-  ['angleInput','massInput','muInput','forceInput'].forEach(id => {
+  ['angleInput','massInput','muInput','forceInput', 'fAngleInput'].forEach(id => {
     document.getElementById(id).addEventListener('input', () => { if(!simIsRunning) drawSim(); });
   });
 
-  document.getElementById('simStartBtn').onclick = () => { 
-    if(!simIsRunning) { simIsRunning = true; document.getElementById('simStartBtn').innerText = "⏸ PAUSE ANIMATION"; drawSim(); }
-    else { simIsRunning = false; document.getElementById('simStartBtn').innerText = "▶ START ANIMATION"; cancelAnimationFrame(animId); }
-  };
-  document.getElementById('simResetBtn').onclick = () => { simIsRunning = false; simBoxX = 50; simBoxV = 0; document.getElementById('simStartBtn').innerText = "▶ START ANIMATION"; drawSim(); };
-
-  function evaluateSimQuiz() {
-    for(let i=1; i<=7; i++) {
-      sendGroupData("Part 3 - Simulation", `Sim_Q${i}`, document.getElementById(`sq${i}`).value, "Logged");
-    }
+  // Solusi Data Logger: Gunakan async/await agar data masuk sempurna secara sekuensial
+  async function evaluateSimQuiz() {
     document.getElementById('simFeedback').style.display = 'block';
+    document.getElementById('simFeedback').className = 'feedback-box';
+    document.getElementById('simFeedback').innerHTML = '<em>Saving data... Please wait.</em>';
+    
+    for(let i=1; i<=7; i++) {
+      let ans = document.getElementById(`sq${i}`).value;
+      await sendGroupDataAsync("Part 3 - Simulation", `Sim_Q${i}`, ans, "Logged");
+    }
+    
+    completionStatus.part3 = true; // Lulus syarat tombol refleksi
     document.getElementById('simFeedback').className = 'feedback-box feedback-success';
-    document.getElementById('simFeedback').innerHTML = '<strong>Lab Data Submitted!</strong> Your analytical responses have been recorded.';
+    document.getElementById('simFeedback').innerHTML = '<strong>Lab Data Submitted!</strong> All responses have been successfully recorded.';
   }
 
   // ==========================================
@@ -470,18 +535,31 @@
   const fbdCenter = {x:300, y:170};
   let currentCase = 0;
 
+// Definisikan ideal rasio panjang terhadap Weight (W). W akan selalu menjadi referensi (rasio = 1)
   const fbdCases = [
-    { title: "Case 1: Book Resting on a Flat Table", desc: "Draw Weight (W) and Normal Force (N). Ensure equal length.",
-      ideals: [{ang: Math.PI/2, val: 'W'}, {ang: -Math.PI/2, val: 'N'}] // rads
+    { title: "Case 1: Book Resting on a Flat Table", desc: "Draw Weight (W) and Normal Force (N). Ensure N and W have the SAME length.",
+      ideals: [
+        {ang: Math.PI/2, val: 'W', ratio: 1.0}, 
+        {ang: -Math.PI/2, val: 'N', ratio: 1.0} // Panjang harus sama dgn W
+      ] 
     },
-    { title: "Case 2: Box Pushed to Right on Rough Floor", desc: "Draw Weight (W), Normal (N), Applied Force (Right), and Friction (Left).",
-      ideals: [{ang: Math.PI/2, val: 'W'}, {ang: -Math.PI/2, val: 'N'}, {ang: 0, val: 'F'}, {ang: Math.PI, val: 'f'}]
+    { title: "Case 2: Box Pushed Right on Rough Floor (Constant Velocity)", desc: "Draw Weight (W), Normal (N), Applied Force (Right), and Friction (Left). N = W, and f = F.",
+      ideals: [
+        {ang: Math.PI/2, val: 'W', ratio: 1.0}, 
+        {ang: -Math.PI/2, val: 'N', ratio: 1.0}, 
+        {ang: 0, val: 'F', ratio: null}, // ratio null berarti panjangnya bebas asalkan ada
+        {ang: Math.PI, val: 'f', ratio: 'match_F'} // f harus sepanjang F
+      ]
     },
-    { title: "Case 3: Block Sliding Down a Rough Incline (30°)", desc: "Draw Weight (Straight down), Normal (Perpendicular up-left), Friction (Parallel up-right).",
-      ideals: [{ang: Math.PI/2, val: 'W'}, {ang: -Math.PI/2 - Math.PI/6, val: 'N'}, {ang: -Math.PI/6, val: 'f'}]
+    { title: "Case 3: Block Sliding Down a Rough Incline (30°)", desc: "Draw Weight (Straight down), Normal (Perpendicular up-left), Friction (Parallel up-right). N must be shorter than W (N = W cos 30°).",
+      ideals: [
+        {ang: Math.PI/2, val: 'W', ratio: 1.0}, 
+        {ang: -Math.PI/2 - Math.PI/6, val: 'N', ratio: 0.866}, // N lebih pendek dari W
+        {ang: -Math.PI/6, val: 'f', ratio: null}
+      ]
     }
   ];
-
+  
   function loadCase(idx) {
     currentCase = idx;
     fbdArrows = [];
@@ -493,78 +571,95 @@
     renderFBD();
   }
 
-  function renderFBD() {
+function renderFBD() {
     fbdCtx.clearRect(0,0,fbdCanvas.width, fbdCanvas.height);
-    // Draw Incline for case 3
-    if(currentCase === 2) {
-      fbdCtx.fillStyle = '#e0e0e0'; fbdCtx.beginPath(); fbdCtx.moveTo(100, 250); fbdCtx.lineTo(500, 250); fbdCtx.lineTo(500, 250 - 400*Math.tan(Math.PI/6)); fbdCtx.fill();
-    } else {
-      fbdCtx.fillStyle = '#e0e0e0'; fbdCtx.fillRect(150, 210, 300, 20);
+    
+    if(currentCase === 2) { // Case Incline
+      // Gambar bidang miring tepat melewati bawah alas kotak
+      fbdCtx.fillStyle = '#e0e0e0'; fbdCtx.beginPath(); 
+      // Posisi fbdCenter adalah 300, 170. Alas kotak berada di y+30 = 200 (sebelum rotasi).
+      // Kita buat garis kemiringan melewati (300, 170)
+      fbdCtx.save();
+      fbdCtx.translate(fbdCenter.x, fbdCenter.y + 30);
+      fbdCtx.rotate(-Math.PI/6);
+      fbdCtx.fillRect(-200, 0, 400, 150); // Gambar bidang lantai
+      fbdCtx.restore();
+    } else { // Case Flat
+      fbdCtx.fillStyle = '#e0e0e0'; fbdCtx.fillRect(150, fbdCenter.y + 30, 300, 50);
     }
     
-    // Box
+    // Draw Box
     fbdCtx.save();
     fbdCtx.translate(fbdCenter.x, fbdCenter.y);
     if(currentCase === 2) fbdCtx.rotate(-Math.PI/6);
-    fbdCtx.fillStyle = '#1a5f7a'; fbdCtx.fillRect(-30, -30, 60, 60);
+    fbdCtx.fillStyle = '#1a5f7a'; fbdCtx.fillRect(-30, -30, 60, 60); // Alas kotak ada di +30
     fbdCtx.restore();
 
+    // Center point
     fbdCtx.beginPath(); fbdCtx.arc(fbdCenter.x, fbdCenter.y, 5, 0, Math.PI*2); fbdCtx.fillStyle = '#ff4d4d'; fbdCtx.fill();
+    
     fbdArrows.forEach(a => drawArrow(fbdCtx, fbdCenter.x, fbdCenter.y, a.x, a.y, '#007bff', ''));
     if(isDrawingFbd) drawArrow(fbdCtx, fbdCenter.x, fbdCenter.y, fbdEnd.x, fbdEnd.y, '#ffc107', '');
   }
 
-  fbdCanvas.addEventListener('mousedown', e => {
-    let r = fbdCanvas.getBoundingClientRect();
-    if(Math.hypot(e.clientX-r.left-fbdCenter.x, e.clientY-r.top-fbdCenter.y) < 40) {
-      isDrawingFbd = true; fbdEnd = {x: e.clientX-r.left, y: e.clientY-r.top};
-    }
-  });
-  fbdCanvas.addEventListener('mousemove', e => {
-    if(!isDrawingFbd) return;
-    let r = fbdCanvas.getBoundingClientRect(); fbdEnd = {x: e.clientX-r.left, y: e.clientY-r.top}; renderFBD();
-  });
-  fbdCanvas.addEventListener('mouseup', () => {
-    if(isDrawingFbd) {
-      if(Math.hypot(fbdEnd.x-fbdCenter.x, fbdEnd.y-fbdCenter.y) > 20) fbdArrows.push({...fbdEnd});
-      isDrawingFbd = false; renderFBD();
-    }
-  });
-
-  document.getElementById('fbdClearBtn').onclick = () => { fbdArrows = []; renderFBD(); };
-  document.getElementById('fbdNextBtn').onclick = () => loadCase(currentCase + 1);
-  
+  // PENILAIAN AI FBD (Arah + Panjang)
   document.getElementById('fbdCheckBtn').onclick = () => {
     const fb = document.getElementById('fbdFeedback');
     let ideals = fbdCases[currentCase].ideals;
-    let matched = 0;
     let feedbackMsgs = [];
+    
+    let wLength = 0;
+    let fLength = 0;
+    let matchedVectors = {}; // Menyimpan data panah yang digambar user sesuai tipenya
 
-    // Evaluasi AI Sederhana (Mengecek sudut panah dgn toleransi +- 0.3 rad / ~17 derajat)
+    // 1. Identifikasi arah dan hitung panjang
     ideals.forEach(ideal => {
-      let found = false;
       for(let i=0; i<fbdArrows.length; i++) {
         let uAng = Math.atan2(fbdArrows[i].y - fbdCenter.y, fbdArrows[i].x - fbdCenter.x);
-        // Normalize angles to -PI to PI
         let diff = Math.atan2(Math.sin(uAng - ideal.ang), Math.cos(uAng - ideal.ang));
-        if (Math.abs(diff) < 0.3) { found = true; break; }
+        
+        if (Math.abs(diff) < 0.3) { 
+          let len = Math.hypot(fbdArrows[i].x - fbdCenter.x, fbdArrows[i].y - fbdCenter.y);
+          matchedVectors[ideal.val] = len;
+          if (ideal.val === 'W') wLength = len;
+          if (ideal.val === 'F') fLength = len;
+          break; 
+        }
       }
-      if(found) matched++;
-      else feedbackMsgs.push(`Missing/incorrect angle for ${ideal.val} vector.`);
+      if(!matchedVectors[ideal.val]) feedbackMsgs.push(`Missing/wrong direction for ${ideal.val}`);
     });
 
-    // Cek jumlah total panah agar tidak kebanyakan
-    if (fbdArrows.length > ideals.length) feedbackMsgs.push("Too many vectors drawn.");
+    // 2. Evaluasi Panjang (HOTS) jika semua arah benar
+    if (feedbackMsgs.length === 0) {
+      ideals.forEach(ideal => {
+        if (ideal.val === 'N' && wLength > 0) {
+          let userRatio = matchedVectors['N'] / wLength;
+          let expectedRatio = ideal.ratio;
+          // Toleransi panjang 15%
+          if (Math.abs(userRatio - expectedRatio) > 0.15) {
+             if (expectedRatio === 1) feedbackMsgs.push(`Normal (N) length must equal Weight (W)`);
+             else feedbackMsgs.push(`Normal (N) must be shorter than Weight (W) based on incline angle`);
+          }
+        }
+        if (ideal.val === 'f' && ideal.ratio === 'match_F' && fLength > 0) {
+           let fRatio = matchedVectors['f'] / fLength;
+           if (Math.abs(fRatio - 1.0) > 0.15) feedbackMsgs.push(`Friction (f) length must equal Applied Force (F) for constant velocity`);
+        }
+      });
+    }
+
+    if (fbdArrows.length > ideals.length) feedbackMsgs.push("Too many vectors drawn. Erase extra lines.");
 
     fb.style.display = 'block';
-    if (matched === ideals.length && fbdArrows.length === ideals.length) {
+    if (feedbackMsgs.length === 0) {
       fb.className = 'feedback-box feedback-success';
-      fb.innerHTML = '<strong>Perfect!</strong> All force vectors are drawn with correct directions.';
-      sendGroupData("Part 4 - FBD", `Case_${currentCase+1}`, "Correct Vectors", "100");
+      fb.innerHTML = '<strong>Perfect!</strong> All force vectors have the correct direction AND proportional magnitudes!';
+      sendGroupDataAsync("Part 4 - FBD", `Case_${currentCase+1}`, "Correct Vectors & Length", "100");
+      if (currentCase === 2) completionStatus.part4 = true; // Set selesai jika pass case 3
     } else {
       fb.className = 'feedback-box feedback-error';
       fb.innerHTML = `<strong>Review Needed:</strong><br>- ` + feedbackMsgs.join('<br>- ');
-      sendGroupData("Part 4 - FBD", `Case_${currentCase+1}`, "Incorrect Vectors", (matched/ideals.length*100).toFixed(0));
+      sendGroupDataAsync("Part 4 - FBD", `Case_${currentCase+1}`, "Incorrect Vectors", "0");
     }
   };
 
