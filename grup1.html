@@ -7,7 +7,9 @@
   <style>
     :root { --primary-color: #1a5f7a; --secondary-color: #007bff; --bg-color: #f4f6f9; --card-bg: #ffffff; --text-color: #333333; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; line-height: 1.6; }
-    .container { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+    .container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+    
+    /* NAVIGATION */
     .nav-tabs { display: flex; gap: 10px; background: #e0e0e0; padding: 10px; border-radius: 10px; margin-bottom: 25px; flex-wrap: wrap; }
     .tab-btn { flex: 1; padding: 12px 15px; border: none; background: none; font-weight: bold; color: #555; cursor: pointer; border-radius: 6px; transition: all 0.3s ease; }
     .tab-btn.active { background: var(--primary-color); color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -15,10 +17,15 @@
     .section-content.active { display: block; }
     h2 { color: var(--primary-color); margin-top: 0; }
     
-    /* VIDEO */
-    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-bottom: 20px; }
-    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    .quiz-overlay { display: none; background: #f8f9fa; border: 2px solid var(--primary-color); padding: 20px; border-radius: 8px; margin-top: 15px; }
+    /* SECTION 1: VIDEO & QUIZ SIDE-BY-SIDE */
+    .video-quiz-layout { display: flex; gap: 20px; flex-wrap: wrap; }
+    .video-section { flex: 1.2; min-width: 300px; }
+    .quiz-section { flex: 1; min-width: 300px; max-height: 500px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6; }
+    .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    .quiz-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 6px; border-left: 4px solid var(--primary-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .quiz-card h4 { margin-top: 0; color: #333; font-size: 1em; }
+    .quiz-option { display: block; margin: 8px 0; cursor: pointer; font-size: 0.95em; }
     
     /* FLASHCARDS */
     .flashcards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
@@ -32,13 +39,15 @@
 
     /* SIMULATION */
     .sim-layout { display: flex; flex-wrap: wrap; gap: 20px; }
-    canvas { background: #eef7fc; border: 2px solid #bce1f3; border-radius: 8px; display: block; margin: 0 auto; }
+    canvas { background: #eef7fc; border: 2px solid #bce1f3; border-radius: 8px; display: block; margin: 0 auto; max-width: 100%; }
     .sim-controls { flex: 1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
     .q-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
     textarea, input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
     
-    .btn { padding: 10px 20px; border: none; border-radius: 6px; background: var(--secondary-color); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    /* UTILS */
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; background: var(--secondary-color); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: opacity 0.2s; }
     .btn:hover { opacity: 0.9; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
     .feedback-box { padding: 15px; border-radius: 6px; margin-top: 15px; display: none; }
     .feedback-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .feedback-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
@@ -56,14 +65,23 @@
 
   <!-- SECTION 1: VIDEO QUIZ -->
   <div class="section-content active" id="sec-0">
-    <h2>Section 1: Interactive Video Concept</h2>
-    <div class="video-container"><div id="yt-player"></div></div>
-    <div id="videoQuizOverlay" class="quiz-overlay">
-      <h3 id="videoQTitle">Checkpoint Question</h3>
-      <div id="videoQContainer"></div>
-      <button class="btn" id="submitVideoAnsBtn">Submit Answer</button>
-      <div id="videoFeedback" class="feedback-box"></div>
-      <button class="btn" id="continueVideoBtn" style="display:none; background:#28a745;">Continue Video</button>
+    <h2>Section 1: Guided Video Analysis</h2>
+    <p>Watch the video and answer the questions on the right. You can answer them as you watch!</p>
+    
+    <div class="video-quiz-layout">
+      <!-- Kiri: Video -->
+      <div class="video-section">
+        <div class="video-container">
+          <iframe src="https://www.youtube.com/embed/IBDk8Opqn8E" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </div>
+      
+      <!-- Kanan: Scrollable Quiz -->
+      <div class="quiz-section" id="quizContainer">
+        <div id="videoQuestionsWrapper"></div>
+        <button class="btn" id="submitVideoAnsBtn" style="width: 100%; margin-top: 15px;">Submit All Answers</button>
+        <div id="videoFeedback" class="feedback-box"></div>
+      </div>
     </div>
   </div>
 
@@ -167,7 +185,7 @@
     </div>
     <div id="fbdFeedback" class="feedback-box"></div>
 
-    <!-- REFLECTION BUTTON (Hanya ada di Part 4) -->
+    <!-- REFLECTION BUTTON -->
     <hr style="margin: 40px 0;">
     <div style="text-align: center; padding: 20px; background: #eef7fc; border-radius: 10px;">
       <h3>End Learning Session</h3>
@@ -177,32 +195,25 @@
   </div>
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
   // ==========================================
   // GLOBALS & UTILITIES
   // ==========================================
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzWB2hwHdaXkVeuxXbsSVXSb0Crn5H9v7NOaXUmYW_xZeN3IVnJGhfAndZHqLjtIBb5g/exec";
-  let completionStatus = { part2: false, part3: false, part4: false };
+  let completionStatus = { part1: false, part2: false, part3: false, part4: false };
 
-  // Sync logger (untuk event ringan)
   function sendGroupData(sectionName, questionId, answer, status) {
     const studentName = localStorage.getItem("studentName") || "Anonymous";
     const payload = { sheetTarget: "grup1", studentName, sectionName, questionId, answer, status };
-    fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-      .catch(err => console.log("Log error:", err));
+    fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }).catch(err => console.log(err));
   }
 
-  // Async logger (untuk form berseri, mencegah data hilang)
   async function sendGroupDataAsync(sectionName, questionId, answer, status) {
     const studentName = localStorage.getItem("studentName") || "Anonymous";
     const payload = { sheetTarget: "grup1", studentName, sectionName, questionId, answer, status };
-    try {
-      await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-    } catch(err) { console.log("Log error:", err); }
+    try { await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); } catch(err) {}
   }
 
-  // Draw Arrow Helper (Dipakai oleh Sim & FBD)
   function drawArrow(ctx, fromX, fromY, toX, toY, color, label) {
     if(fromX===toX && fromY===toY) return;
     let head = 10, angle = Math.atan2(toY-fromY, toX-fromX);
@@ -227,83 +238,87 @@
     if(index === 3) renderFBD();
   }
 
-  // Reflection Validation
   document.getElementById('reflectionBtn').onclick = () => {
-    if (completionStatus.part2 && completionStatus.part3 && completionStatus.part4) {
+    if (completionStatus.part1 && completionStatus.part2 && completionStatus.part3 && completionStatus.part4) {
       window.location.href = "https://stefanussetiawan1592-dev.github.io/forces/reflection";
     } else {
       let missing = [];
+      if (!completionStatus.part1) missing.push("Part 1 (Video Quiz)");
       if (!completionStatus.part2) missing.push("Part 2 (Concept Check)");
       if (!completionStatus.part3) missing.push("Part 3 (Simulation Lab)");
       if (!completionStatus.part4) missing.push("Part 4 (FBD Challenge)");
-      alert("Warning: You have not completed the following sections:\n- " + missing.join("\n- ") + "\n\nPlease complete them first so your observation data is properly recorded.");
+      alert("Warning: You have not completed the following sections:\n- " + missing.join("\n- ") + "\n\nPlease complete them first.");
     }
   };
 
   // ==========================================
-  // PART 1: VIDEO QUIZ
+  // PART 1: VIDEO QUIZ (GUIDED VIEWING)
   // ==========================================
-  let ytPlayer;
   const videoQuizzes = [
-    { id: "Video_Q1", time: 45, type: "single", question: "What is the primary purpose of constructing a Free Body Diagram (FBD)?", options: ["Calculate final velocity directly", "Isolate a single object and show all external forces", "Measure mass and volume", "Trace motion trajectory without forces"], correct: [1], triggered: false },
-    { id: "Video_Q3", time: 75, type: "single", question: "In what direction does the weight (W) force always act on an object, regardless of whether it is in level flight or on an inclined slope?", options: ["Parallel to the slope", "Perpendicular to the surface", "Vertically downwards", "Horizontally opposite to thrust"], correct: [2], triggered: false },
-    { id: "Video_Q4", time: 150, type: "multiple", question: "Which of the following forces act on an aircraft during steady, level flight? (Select ALL that apply)", options: ["Weight (acting downwards)", "Lift (acting upwards)", "Thrust (pushing forward)", "Drag / Air Resistance (opposing forward motion)"], correct: [0, 1, 2, 3], triggered: false },
-    { id: "Video_Q5", time: 180, type: "single", question: "For a boat floating in equilibrium on water, what is the relationship between its weight and the upthrust force?", options: ["Upthrust is greater than weight to keep it afloat", "Upthrust is equal in magnitude to weight", "Weight is greater than upthrust", "Upthrust is zero because the boat is at rest"], correct: [1], triggered: false },
-    { id: "Video_Q2", time: 270, type: "single", question: "On an inclined plane, which component of weight presses PERPENDICULARLY against the surface?", options: ["W<sub>x</sub> = W &middot; sin(&theta;)", "W<sub>y</sub> = W &middot; cos(&theta;)", "Frictional Force (f)", "Applied Force (F)"], correct: [1], triggered: false }
+    { id: "Video_Q1", type: "single", question: "1. What is the primary purpose of constructing a Free Body Diagram (FBD)?", options: ["Calculate final velocity directly", "Isolate a single object and show all external forces", "Measure mass and volume", "Trace motion trajectory without forces"], correct: [1] },
+    { id: "Video_Q3", type: "single", question: "2. In what direction does the weight (W) force always act on an object, regardless of the slope?", options: ["Parallel to the slope", "Perpendicular to the surface", "Vertically downwards", "Horizontally opposite to thrust"], correct: [2] },
+    { id: "Video_Q4", type: "multiple", question: "3. Which forces act on an aircraft during steady, level flight? (Select ALL that apply)", options: ["Weight (downwards)", "Lift (upwards)", "Thrust (forward)", "Drag (opposing forward motion)"], correct: [0, 1, 2, 3] },
+    { id: "Video_Q5", type: "single", question: "4. For a boat floating in equilibrium on water, what is the relationship between its weight and upthrust?", options: ["Upthrust is greater than weight", "Upthrust is equal in magnitude to weight", "Weight is greater than upthrust", "Upthrust is zero"], correct: [1] },
+    { id: "Video_Q2", type: "single", question: "5. On an inclined plane, which component of weight presses PERPENDICULARLY against the surface?", options: ["Wx = W &middot; sin(&theta;)", "Wy = W &middot; cos(&theta;)", "Frictional Force (f)", "Applied Force (F)"], correct: [1] }
   ];
 
-  function onYouTubeIframeAPIReady() {
-    ytPlayer = new YT.Player('yt-player', { videoId: 'IBDk8Opqn8E', playerVars: { 'playsinline': 1, 'origin': window.location.origin }, events: { 'onStateChange': onPlayerStateChange } });
-  }
-
-  let checkTimer;
-  function onPlayerStateChange(event) {
-    if (event.data == YT.PlayerState.PLAYING) {
-      checkTimer = setInterval(() => {
-        let t = Math.floor(ytPlayer.getCurrentTime());
-        videoQuizzes.forEach(q => { if (t === q.time && !q.triggered) { q.triggered = true; ytPlayer.pauseVideo(); showVideoQuiz(q); } });
-      }, 1000);
-    } else clearInterval(checkTimer);
-  }
-
-  let currentVQ;
-  function showVideoQuiz(q) {
-    currentVQ = q;
-    document.getElementById('videoQuizOverlay').style.display = 'block';
-    document.getElementById('videoQTitle').innerHTML = q.question;
-    document.getElementById('videoFeedback').style.display = 'none';
-    document.getElementById('submitVideoAnsBtn').style.display = 'inline-block';
-    document.getElementById('continueVideoBtn').style.display = 'none';
-    
-    let container = document.getElementById('videoQContainer');
-    container.innerHTML = '';
-    let inputType = q.type === "multiple" ? "checkbox" : "radio";
-    q.options.forEach((opt, idx) => {
-      container.innerHTML += `<label style="display:block; margin:8px 0; cursor:pointer;"><input type="${inputType}" name="vQ" value="${idx}"> ${opt}</label>`;
+  function renderVideoQuizzes() {
+    const wrapper = document.getElementById('videoQuestionsWrapper');
+    wrapper.innerHTML = "";
+    videoQuizzes.forEach((q, qIndex) => {
+      let html = `<div class="quiz-card"><h4>${q.question}</h4>`;
+      let inputType = q.type === "multiple" ? "checkbox" : "radio";
+      q.options.forEach((opt, oIndex) => {
+        html += `<label class="quiz-option"><input type="${inputType}" name="vq_${qIndex}" value="${oIndex}"> ${opt}</label>`;
+      });
+      html += `</div>`;
+      wrapper.innerHTML += html;
     });
   }
+  renderVideoQuizzes();
 
-  document.getElementById('submitVideoAnsBtn').onclick = () => {
-    const selectedNodes = document.querySelectorAll('input[name="vQ"]:checked');
-    if (selectedNodes.length === 0) return alert('Please select an answer!');
-    
-    let studentAns = Array.from(selectedNodes).map(n => parseInt(n.value)).sort();
-    let isCorrect = currentVQ.correct.length === studentAns.length && currentVQ.correct.every((val, index) => val === studentAns[index]);
-    
+  document.getElementById('submitVideoAnsBtn').onclick = async () => {
+    let allAnswered = true;
+    let totalScore = 0;
+
+    // Validation check
+    videoQuizzes.forEach((q, qIndex) => {
+      let checked = document.querySelectorAll(`input[name="vq_${qIndex}"]:checked`);
+      if (checked.length === 0) allAnswered = false;
+    });
+
+    if (!allAnswered) {
+      alert("Please answer all questions before submitting.");
+      return;
+    }
+
+    document.getElementById('submitVideoAnsBtn').disabled = true;
+    document.getElementById('submitVideoAnsBtn').innerText = "Submitting...";
+
+    // Grading and sending data
+    for (let qIndex = 0; qIndex < videoQuizzes.length; qIndex++) {
+      let q = videoQuizzes[qIndex];
+      let checkedNodes = document.querySelectorAll(`input[name="vq_${qIndex}"]:checked`);
+      let studentAns = Array.from(checkedNodes).map(n => parseInt(n.value)).sort();
+      
+      let isCorrect = q.correct.length === studentAns.length && q.correct.every((val, idx) => val === studentAns[idx]);
+      if (isCorrect) totalScore++;
+
+      await sendGroupDataAsync("Part 1 - Video Quiz", q.id, studentAns.join(","), isCorrect ? "Correct" : "Incorrect");
+    }
+
     let fb = document.getElementById('videoFeedback');
     fb.style.display = 'block';
-    sendGroupData("Part 1 - Video Quiz", currentVQ.id, studentAns.join(","), isCorrect ? "Correct (100)" : "Incorrect (0)");
-
-    if (isCorrect) { fb.className = 'feedback-box feedback-success'; fb.innerHTML = '<strong>Correct!</strong> Great job analyzing the concept.'; } 
-    else { fb.className = 'feedback-box feedback-error'; fb.innerHTML = '<strong>Incorrect.</strong> Please review the concepts carefully.'; }
-
-    document.getElementById('submitVideoAnsBtn').style.display = 'none';
-    document.getElementById('continueVideoBtn').style.display = 'inline-block';
-  };
-
-  document.getElementById('continueVideoBtn').onclick = () => {
-    document.getElementById('videoQuizOverlay').style.display = 'none';
-    ytPlayer.playVideo();
+    if (totalScore === videoQuizzes.length) {
+      fb.className = 'feedback-box feedback-success';
+      fb.innerHTML = `<strong>Excellent!</strong> You got ${totalScore}/${videoQuizzes.length} correct. Data saved.`;
+    } else {
+      fb.className = 'feedback-box feedback-error';
+      fb.innerHTML = `<strong>Good effort!</strong> You got ${totalScore}/${videoQuizzes.length} correct. Please review the material if needed.`;
+    }
+    
+    completionStatus.part1 = true;
+    document.getElementById('submitVideoAnsBtn').innerText = "Answers Submitted";
   };
 
   // ==========================================
@@ -336,7 +351,7 @@
     fb.className = 'feedback-box feedback-success';
     fb.innerHTML = `<strong>Responses Recorded!</strong><br>Story 1: ${s1Correct?'Perfect!':'Review fluid forces.'}<br>Story 2: ${s2Correct?'Excellent!':'Remember ground interactions.'}`;
     
-    completionStatus.part2 = true; // Mark as done
+    completionStatus.part2 = true;
   }
 
   // ==========================================
