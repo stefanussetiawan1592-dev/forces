@@ -32,7 +32,7 @@
 
     /* SIMULATION */
     .sim-layout { display: flex; flex-wrap: wrap; gap: 20px; }
-    canvas { background: #eef7fc; border: 2px solid #bce1f3; border-radius: 8px; }
+    canvas { background: #eef7fc; border: 2px solid #bce1f3; border-radius: 8px; display: block; margin: 0 auto; }
     .sim-controls { flex: 1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
     .q-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
     textarea, input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
@@ -49,16 +49,9 @@
 <div class="container">
   <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab(0)">1. Video Quiz</button>
-    <button class="tab-btn" onclick="switchTab(1)">2. Force Flashcards</button>
+    <button class="tab-btn" onclick="switchTab(1)">2. Concept Check</button>
     <button class="tab-btn" onclick="switchTab(2)">3. Simulation Lab</button>
     <button class="tab-btn" onclick="switchTab(3)">4. FBD Challenge</button>
-    <!-- REFLECTION BUTTON -->
-  <hr style="margin: 40px 0;">
-  <div style="text-align: center; padding: 20px; background: #eef7fc; border-radius: 10px;">
-    <h3>Akhiri Sesi Pembelajaran</h3>
-    <p>Pastikan Anda telah menyelesaikan Concept Check (Bagian 2), Lab Simulation (Bagian 3), dan FBD Challenge (Bagian 4).</p>
-    <button class="btn" id="reflectionBtn" style="background: #6f42c1; font-size: 1.1em; padding: 12px 25px;">Proceed to Reflection</button>
-  </div>
   </div>
 
   <!-- SECTION 1: VIDEO QUIZ -->
@@ -155,16 +148,16 @@
     <div id="simFeedback" class="feedback-box"></div>
   </div>
 
-  <!-- SECTION 4: FBD DRAWING QUIZ -->
+  <!-- SECTION 4: FBD DRAWING QUIZ & REFLECTION -->
   <div class="section-content" id="sec-3">
     <h2>Section 4: Advanced FBD Vector Drawing</h2>
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h3 id="fbdScenarioTitle">Case 1: Book Resting on a Flat Table</h3>
       <span style="font-weight:bold; color:var(--primary-color);">Case <span id="fbdCaseNum">1</span>/3</span>
     </div>
-    <p id="fbdScenarioDesc">Draw the vectors for Weight (W) and Normal Force (N). Pay attention to direction and relative length.</p>
+    <p id="fbdScenarioDesc">Draw Weight (W) and Normal Force (N). Ensure N and W have the SAME length.</p>
     
-    <div style="text-align:center; margin: 15px 0;">
+    <div style="margin: 15px 0;">
       <canvas id="fbdCanvas" width="600" height="340" style="cursor: crosshair;"></canvas>
     </div>
     <div style="text-align:center;">
@@ -173,13 +166,68 @@
       <button class="btn" style="background:#28a745; display:none;" id="fbdNextBtn">Next Case &rarr;</button>
     </div>
     <div id="fbdFeedback" class="feedback-box"></div>
+
+    <!-- REFLECTION BUTTON (Hanya ada di Part 4) -->
+    <hr style="margin: 40px 0;">
+    <div style="text-align: center; padding: 20px; background: #eef7fc; border-radius: 10px;">
+      <h3>End Learning Session</h3>
+      <p>Please ensure you have completed Concept Check (Part 2), Lab Simulation (Part 3), and FBD Challenge (Part 4) before proceeding.</p>
+      <button class="btn" id="reflectionBtn" style="background: #6f42c1; font-size: 1.1em; padding: 12px 25px;">Proceed to Reflection</button>
+    </div>
   </div>
 </div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+  // ==========================================
+  // GLOBALS & UTILITIES
+  // ==========================================
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzWB2hwHdaXkVeuxXbsSVXSb0Crn5H9v7NOaXUmYW_xZeN3IVnJGhfAndZHqLjtIBb5g/exec";
   let completionStatus = { part2: false, part3: false, part4: false };
 
+  // Sync logger (untuk event ringan)
+  function sendGroupData(sectionName, questionId, answer, status) {
+    const studentName = localStorage.getItem("studentName") || "Anonymous";
+    const payload = { sheetTarget: "grup1", studentName, sectionName, questionId, answer, status };
+    fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      .catch(err => console.log("Log error:", err));
+  }
+
+  // Async logger (untuk form berseri, mencegah data hilang)
+  async function sendGroupDataAsync(sectionName, questionId, answer, status) {
+    const studentName = localStorage.getItem("studentName") || "Anonymous";
+    const payload = { sheetTarget: "grup1", studentName, sectionName, questionId, answer, status };
+    try {
+      await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    } catch(err) { console.log("Log error:", err); }
+  }
+
+  // Draw Arrow Helper (Dipakai oleh Sim & FBD)
+  function drawArrow(ctx, fromX, fromY, toX, toY, color, label) {
+    if(fromX===toX && fromY===toY) return;
+    let head = 10, angle = Math.atan2(toY-fromY, toX-fromX);
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(toX, toY);
+    ctx.lineTo(toX-head*Math.cos(angle-Math.PI/6), toY-head*Math.sin(angle-Math.PI/6));
+    ctx.lineTo(toX-head*Math.cos(angle+Math.PI/6), toY-head*Math.sin(angle+Math.PI/6));
+    ctx.fill();
+    ctx.font = "16px Arial"; ctx.fillText(label, toX + 5, toY + 5);
+  }
+
+  function switchTab(index) {
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
+    document.querySelectorAll('.section-content').forEach((sec, i) => sec.classList.toggle('active', i === index));
+    if(index === 2) { 
+      simIsRunning = false; 
+      cancelAnimationFrame(animId);
+      document.getElementById('simStartBtn').innerText = "▶ START ANIMATION";
+      drawSim(); 
+    }
+    if(index === 3) renderFBD();
+  }
+
+  // Reflection Validation
   document.getElementById('reflectionBtn').onclick = () => {
     if (completionStatus.part2 && completionStatus.part3 && completionStatus.part4) {
       window.location.href = "https://stefanussetiawan1592-dev.github.io/forces/reflection";
@@ -188,93 +236,24 @@
       if (!completionStatus.part2) missing.push("Part 2 (Concept Check)");
       if (!completionStatus.part3) missing.push("Part 3 (Simulation Lab)");
       if (!completionStatus.part4) missing.push("Part 4 (FBD Challenge)");
-      alert("Peringatan: Anda belum menyelesaikan bagian berikut:\n- " + missing.join("\n- ") + "\n\nSilakan lengkapi terlebih dahulu agar data observasi terekam dengan baik.");
+      alert("Warning: You have not completed the following sections:\n- " + missing.join("\n- ") + "\n\nPlease complete them first so your observation data is properly recorded.");
     }
   };
-
-  // Modifikasi fungsi sendGroupData agar menggunakan async/await untuk mencegah data hilang (seperti di image_b6b8e6.png)
-  async function sendGroupDataAsync(sectionName, questionId, answer, status) {
-    const studentName = localStorage.getItem("studentName") || "Anonymous";
-    const payload = { sheetTarget: "grup1", studentName, sectionName, questionId, answer, status };
-    
-    try {
-      await fetch(SCRIPT_URL, {
-        method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-    } catch(err) { console.log("Log error:", err); }
-  }
-  // ==========================================
-  // DATA LOGGER TO GOOGLE SHEETS
-  // ==========================================
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzWB2hwHdaXkVeuxXbsSVXSb0Crn5H9v7NOaXUmYW_xZeN3IVnJGhfAndZHqLjtIBb5g/exec";
-
-  function sendGroupData(sectionName, questionId, answer, status) {
-    const studentName = localStorage.getItem("studentName") || "Anonymous";
-    const payload = { sheetTarget: "grup1", studentName, sectionName, questionId, answer, status };
-    
-    fetch(SCRIPT_URL, {
-      method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    }).catch(err => console.log("Log error:", err));
-  }
-
-  function switchTab(index) {
-    document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-    document.querySelectorAll('.section-content').forEach((sec, i) => sec.classList.toggle('active', i === index));
-    if(index === 2) { simIsRunning = false; drawSim(); }
-    if(index === 3) renderFBD();
-  }
 
   // ==========================================
   // PART 1: VIDEO QUIZ
   // ==========================================
   let ytPlayer;
   const videoQuizzes = [
-    {
-      id: "Video_Q1", time: 45,
-      question: "What is the primary purpose of constructing a Free Body Diagram (FBD)?",
-      options: ["Calculate final velocity directly", "Isolate a single object and show all external forces", "Measure mass and volume", "Trace motion trajectory without forces"],
-      correct: 1, triggered: false
-    },
-    {
-      id: "Video_Q2", time: 75,
-      type: "single",
-      question: "In what direction does the weight (W) force always act on an object, regardless of whether it is in level flight or on an inclined slope?",
-      options: ["Parallel to the slope", "Perpendicular to the surface", "Vertically downwards", "Horizontally opposite to thrust"],
-      correct: [2], // C) Vertically downwards
-      triggered: false
-    },
-    {
-      id: "Video_Q3", time: 150,
-      type: "multiple",
-      question: "Which of the following forces act on an aircraft during steady, level flight?",
-      options: ["Weight (acting downwards)", "Lift (acting upwards)", "Thrust (pushing forward)", "Drag / Air Resistance (opposing forward motion)"],
-      correct: [0, 1, 2, 3], // Semua opsi benar
-      triggered: false
-    },
-    {
-      id: "Video_Q4", time: 180,
-      type: "single",
-      question: "For a boat floating in equilibrium on water, what is the relationship between its weight and the upthrust force?",
-      options: ["Upthrust is greater than weight to keep it afloat", "Upthrust is equal in magnitude to weight", "Weight is greater than upthrust", "Upthrust is zero because the boat is at rest"],
-      correct: [1], // B) Equal in magnitude
-      triggered: false
-    },
-    {
-      id: "Video_Q5", time: 270, // Dipindah ke 4:30
-      question: "On an inclined plane, which component of weight presses PERPENDICULARLY against the surface?",
-      options: ["W<sub>x</sub> = W &middot; sin(&theta;)", "W<sub>y</sub> = W &middot; cos(&theta;)", "Frictional Force (f)", "Applied Force (F)"],
-      correct: 1, triggered: false
-    }
+    { id: "Video_Q1", time: 45, type: "single", question: "What is the primary purpose of constructing a Free Body Diagram (FBD)?", options: ["Calculate final velocity directly", "Isolate a single object and show all external forces", "Measure mass and volume", "Trace motion trajectory without forces"], correct: [1], triggered: false },
+    { id: "Video_Q3", time: 75, type: "single", question: "In what direction does the weight (W) force always act on an object, regardless of whether it is in level flight or on an inclined slope?", options: ["Parallel to the slope", "Perpendicular to the surface", "Vertically downwards", "Horizontally opposite to thrust"], correct: [2], triggered: false },
+    { id: "Video_Q4", time: 150, type: "multiple", question: "Which of the following forces act on an aircraft during steady, level flight? (Select ALL that apply)", options: ["Weight (acting downwards)", "Lift (acting upwards)", "Thrust (pushing forward)", "Drag / Air Resistance (opposing forward motion)"], correct: [0, 1, 2, 3], triggered: false },
+    { id: "Video_Q5", time: 180, type: "single", question: "For a boat floating in equilibrium on water, what is the relationship between its weight and the upthrust force?", options: ["Upthrust is greater than weight to keep it afloat", "Upthrust is equal in magnitude to weight", "Weight is greater than upthrust", "Upthrust is zero because the boat is at rest"], correct: [1], triggered: false },
+    { id: "Video_Q2", time: 270, type: "single", question: "On an inclined plane, which component of weight presses PERPENDICULARLY against the surface?", options: ["W<sub>x</sub> = W &middot; sin(&theta;)", "W<sub>y</sub> = W &middot; cos(&theta;)", "Frictional Force (f)", "Applied Force (F)"], correct: [1], triggered: false }
   ];
 
   function onYouTubeIframeAPIReady() {
-    ytPlayer = new YT.Player('yt-player', {
-      videoId: 'IBDk8Opqn8E',
-      playerVars: { 'playsinline': 1, 'origin': window.location.origin },
-      events: { 'onStateChange': onPlayerStateChange }
-    });
+    ytPlayer = new YT.Player('yt-player', { videoId: 'IBDk8Opqn8E', playerVars: { 'playsinline': 1, 'origin': window.location.origin }, events: { 'onStateChange': onPlayerStateChange } });
   }
 
   let checkTimer;
@@ -282,11 +261,7 @@
     if (event.data == YT.PlayerState.PLAYING) {
       checkTimer = setInterval(() => {
         let t = Math.floor(ytPlayer.getCurrentTime());
-        videoQuizzes.forEach(q => {
-          if (t === q.time && !q.triggered) {
-            q.triggered = true; ytPlayer.pauseVideo(); showVideoQuiz(q);
-          }
-        });
+        videoQuizzes.forEach(q => { if (t === q.time && !q.triggered) { q.triggered = true; ytPlayer.pauseVideo(); showVideoQuiz(q); } });
       }, 1000);
     } else clearInterval(checkTimer);
   }
@@ -302,29 +277,25 @@
     
     let container = document.getElementById('videoQContainer');
     container.innerHTML = '';
+    let inputType = q.type === "multiple" ? "checkbox" : "radio";
     q.options.forEach((opt, idx) => {
-      container.innerHTML += `<label style="display:block; margin:8px 0; cursor:pointer;"><input type="radio" name="vQ" value="${idx}"> ${opt}</label>`;
+      container.innerHTML += `<label style="display:block; margin:8px 0; cursor:pointer;"><input type="${inputType}" name="vQ" value="${idx}"> ${opt}</label>`;
     });
   }
 
   document.getElementById('submitVideoAnsBtn').onclick = () => {
-    const selected = document.querySelector('input[name="vQ"]:checked');
-    if (!selected) return alert('Please select an answer!');
+    const selectedNodes = document.querySelectorAll('input[name="vQ"]:checked');
+    if (selectedNodes.length === 0) return alert('Please select an answer!');
     
-    let isCorrect = parseInt(selected.value) === currentVQ.correct;
+    let studentAns = Array.from(selectedNodes).map(n => parseInt(n.value)).sort();
+    let isCorrect = currentVQ.correct.length === studentAns.length && currentVQ.correct.every((val, index) => val === studentAns[index]);
+    
     let fb = document.getElementById('videoFeedback');
     fb.style.display = 'block';
-    
-    // Logging Data (Hanya ngirim ID dan Skor status)
-    sendGroupData("Part 1 - Video Quiz", currentVQ.id, "Answered", isCorrect ? "Correct (100)" : "Incorrect (0)");
+    sendGroupData("Part 1 - Video Quiz", currentVQ.id, studentAns.join(","), isCorrect ? "Correct (100)" : "Incorrect (0)");
 
-    if (isCorrect) {
-      fb.className = 'feedback-box feedback-success';
-      fb.innerHTML = '<strong>Correct!</strong> Great job analyzing the concept.';
-    } else {
-      fb.className = 'feedback-box feedback-error';
-      fb.innerHTML = '<strong>Incorrect.</strong> Please review the vectors shown on screen carefully.';
-    }
+    if (isCorrect) { fb.className = 'feedback-box feedback-success'; fb.innerHTML = '<strong>Correct!</strong> Great job analyzing the concept.'; } 
+    else { fb.className = 'feedback-box feedback-error'; fb.innerHTML = '<strong>Incorrect.</strong> Please review the concepts carefully.'; }
 
     document.getElementById('submitVideoAnsBtn').style.display = 'none';
     document.getElementById('continueVideoBtn').style.display = 'inline-block';
@@ -336,7 +307,7 @@
   };
 
   // ==========================================
-  // PART 2: FLASHCARDS (6 Forces) & STORY QUIZ
+  // PART 2: FLASHCARDS & STORY QUIZ
   // ==========================================
   const forces6 = [
     { f: "Upthrust (Buoyancy)", b: "Upward fluid force acting on a submerged body." },
@@ -348,17 +319,13 @@
   ];
 
   const fcContainer = document.getElementById('flashcardsContainer');
-  forces6.forEach(c => {
-    fcContainer.innerHTML += `<div class="card" onclick="this.classList.toggle('flipped')"><div class="card-inner"><div class="card-front">${c.f}</div><div class="card-back">${c.b}</div></div></div>`;
-  });
+  forces6.forEach(c => { fcContainer.innerHTML += `<div class="card" onclick="this.classList.toggle('flipped')"><div class="card-inner"><div class="card-front">${c.f}</div><div class="card-back">${c.b}</div></div></div>`; });
 
   function submitStoryQuiz() {
     let s1 = Array.from(document.querySelectorAll('#story1-options input:checked')).map(cb => cb.value);
     let s2 = Array.from(document.querySelectorAll('#story2-options input:checked')).map(cb => cb.value);
     
-    // Kunci Story 1 (Submarine): Upthrust, Gravitational, Drag
     let s1Correct = s1.includes('Upthrust') && s1.includes('Gravitational') && s1.includes('Drag') && s1.length === 3;
-    // Kunci Story 2 (Braking Car): Normal, Gravitational, Frictional (Drag diizinkan tapi ga wajib, anggap 3 utama)
     let s2Correct = s2.includes('Normal') && s2.includes('Gravitational') && s2.includes('Frictional') && s2.length <= 4;
 
     sendGroupData("Part 2 - Story", "Story_Submarine", s1.join(", "), s1Correct ? "Correct" : "Incorrect");
@@ -368,32 +335,19 @@
     fb.style.display = 'block';
     fb.className = 'feedback-box feedback-success';
     fb.innerHTML = `<strong>Responses Recorded!</strong><br>Story 1: ${s1Correct?'Perfect!':'Review fluid forces.'}<br>Story 2: ${s2Correct?'Excellent!':'Remember ground interactions.'}`;
+    
+    completionStatus.part2 = true; // Mark as done
   }
 
   // ==========================================
-  // PART 3: SIMULATION (WITH ANIMATION & ARROWS)
+  // PART 3: SIMULATION LAB
   // ==========================================
   const simCanvas = document.getElementById('simCanvas');
   const simCtx = simCanvas.getContext('2d');
   
-  let simBoxX = 50; 
-  let simBoxV = 0;
-  let simIsRunning = false;
-  let animId;
+  let simBoxX = 50, simBoxV = 0, simIsRunning = false, animId;
 
-  function drawArrow(ctx, fromX, fromY, toX, toY, color, label) {
-    if(fromX===toX && fromY===toY) return;
-    let head = 10, angle = Math.atan2(toY-fromY, toX-fromX);
-    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(toX, toY);
-    ctx.lineTo(toX-head*Math.cos(angle-Math.PI/6), toY-head*Math.sin(angle-Math.PI/6));
-    ctx.lineTo(toX-head*Math.cos(angle+Math.PI/6), toY-head*Math.sin(angle+Math.PI/6));
-    ctx.fill();
-    ctx.font = "14px Arial"; ctx.fillText(label, toX + 5, toY + 5);
-  }
-
-function drawSim() {
+  function drawSim() {
     simCtx.clearRect(0,0,simCanvas.width, simCanvas.height);
     let deg = parseFloat(document.getElementById('angleInput').value);
     let rad = deg * Math.PI / 180;
@@ -409,58 +363,37 @@ function drawSim() {
     document.getElementById('forceVal').innerText = Fext + ' N';
     document.getElementById('fAngleVal').innerHTML = Fdeg + '&deg;';
 
-    let g = 9.8;
-    let W = m * g;
-    let Wx = W * Math.sin(rad);
-    let Wy = W * Math.cos(rad);
+    let g = 9.8, W = m * g;
+    let Wx = W * Math.sin(rad), Wy = W * Math.cos(rad);
+    let Fx = Fext * Math.cos(Frad), Fy = Fext * Math.sin(Frad);
     
-    // Komponen gaya dorong
-    let Fx = Fext * Math.cos(Frad); // Sejajar bidang
-    let Fy = Fext * Math.sin(Frad); // Tegak lurus bidang (menjauhi bidang jika positif)
-    
-    // Gaya Normal (Bisa berkurang jika ditarik ke atas)
     let N = Wy - Fy; 
-    if (N < 0) N = 0; // Benda terangkat
+    if (N < 0) N = 0; 
 
     let f_max = mu * N;
-    let a = 0;
-    let netForce = 0;
-    let f_actual = 0;
+    let a = 0, netForce = 0, f_actual = 0;
 
     if (simIsRunning) {
       let F_pull = Fx - Wx; 
-      
-      if (N <= 0) {
-        // Jika terangkat, gaya gesek hilang
-        a = F_pull / m;
-      } else if (simBoxV > 0.1) { // Bergerak ke atas ramp
-        f_actual = -f_max;
-        netForce = F_pull + f_actual;
-        a = netForce / m;
-      } else if (simBoxV < -0.1) { // Bergerak ke bawah ramp
-        f_actual = f_max;
-        netForce = F_pull + f_actual;
-        a = netForce / m;
-      } else { // Diam
+      if (N <= 0) { a = F_pull / m; } 
+      else if (simBoxV > 0.1) { f_actual = -f_max; netForce = F_pull + f_actual; a = netForce / m; } 
+      else if (simBoxV < -0.1) { f_actual = f_max; netForce = F_pull + f_actual; a = netForce / m; } 
+      else { 
         if (F_pull > f_max) { netForce = F_pull - f_max; f_actual = -f_max; a = netForce/m; }
         else if (F_pull < -f_max) { netForce = F_pull + f_max; f_actual = f_max; a = netForce/m; }
         else { netForce = 0; f_actual = -F_pull; a = 0; }
       }
       
-      simBoxV += a * 0.05; 
-      simBoxX += simBoxV * 0.5; 
-      
+      simBoxV += a * 0.05; simBoxX += simBoxV * 0.5; 
       if(simBoxX < 0) { simBoxX = 0; simBoxV = 0; }
       if(simBoxX > 300) { simBoxX = 300; simBoxV = 0; }
     }
 
     document.getElementById('accelDisplay').innerText = a.toFixed(2);
 
-    // Draw Ramp
     simCtx.fillStyle = '#ccc';
     simCtx.beginPath(); simCtx.moveTo(50, 280); simCtx.lineTo(400, 280); simCtx.lineTo(400, 280 - 350 * Math.tan(rad)); simCtx.closePath(); simCtx.fill();
 
-    // Base translations
     let boxBaseX = 50 + simBoxX * Math.cos(rad);
     let boxBaseY = 280 - simBoxX * Math.sin(rad);
 
@@ -468,35 +401,26 @@ function drawSim() {
     simCtx.translate(boxBaseX, boxBaseY);
     simCtx.rotate(-rad);
     
-    // Draw Box (Bottom center is at 0,0 relative to translation)
     simCtx.fillStyle = '#1a5f7a'; simCtx.fillRect(-20, -40, 40, 40);
+    let cx = 0, cy = -20; 
     
-    let cx = 0, cy = -20; // Center of box for vectors
-    
-    // 1. Normal (Tegak lurus ke atas dari pusat)
     if(N > 0) drawArrow(simCtx, cx, cy, cx, cy - Math.min(N, 100), '#28a745', 'N');
+    simCtx.restore(); 
     
-    simCtx.restore(); // Restore untuk gambar Weight tegak lurus ke bawah global
-    
-    // 2. Weight (Ke bawah secara absolut)
     drawArrow(simCtx, boxBaseX, boxBaseY - 20, boxBaseX, boxBaseY - 20 + Math.min(W, 100), '#dc3545', 'W');
     
     simCtx.save();
     simCtx.translate(boxBaseX, boxBaseY);
     simCtx.rotate(-rad);
 
-    // 3. Fext (Memiliki sudut kemiringan Frad terhadap bidang)
     if(Fext !== 0) {
-      // Pusat rotasi panah F dari pusat kotak
       let fEndx = cx + Math.min(Math.abs(Fext), 100) * Math.cos(Frad) * Math.sign(Fext);
       let fEndy = cy - Math.min(Math.abs(Fext), 100) * Math.sin(Frad) * Math.sign(Fext);
       drawArrow(simCtx, cx, cy, fEndx, fEndy, '#007bff', 'F');
     }
     
-    // 4. Friction (Tepat di alas kotak / permukaan bidang)
     if(Math.abs(f_actual) > 0.1) {
       let fdir = f_actual > 0 ? 1 : -1; 
-      // Gambar panah f di y = 0 (tepat di garis singgung permukaan)
       drawArrow(simCtx, cx, 0, cx + fdir * Math.min(Math.abs(f_actual), 80), 0, '#ffc107', 'f');
     }
     simCtx.restore();
@@ -508,7 +432,12 @@ function drawSim() {
     document.getElementById(id).addEventListener('input', () => { if(!simIsRunning) drawSim(); });
   });
 
-  // Solusi Data Logger: Gunakan async/await agar data masuk sempurna secara sekuensial
+  document.getElementById('simStartBtn').onclick = () => { 
+    if(!simIsRunning) { simIsRunning = true; document.getElementById('simStartBtn').innerText = "⏸ PAUSE ANIMATION"; drawSim(); }
+    else { simIsRunning = false; document.getElementById('simStartBtn').innerText = "▶ START ANIMATION"; cancelAnimationFrame(animId); }
+  };
+  document.getElementById('simResetBtn').onclick = () => { simIsRunning = false; cancelAnimationFrame(animId); simBoxX = 50; simBoxV = 0; document.getElementById('simStartBtn').innerText = "▶ START ANIMATION"; drawSim(); };
+
   async function evaluateSimQuiz() {
     document.getElementById('simFeedback').style.display = 'block';
     document.getElementById('simFeedback').className = 'feedback-box';
@@ -519,50 +448,28 @@ function drawSim() {
       await sendGroupDataAsync("Part 3 - Simulation", `Sim_Q${i}`, ans, "Logged");
     }
     
-    completionStatus.part3 = true; // Lulus syarat tombol refleksi
+    completionStatus.part3 = true; 
     document.getElementById('simFeedback').className = 'feedback-box feedback-success';
     document.getElementById('simFeedback').innerHTML = '<strong>Lab Data Submitted!</strong> All responses have been successfully recorded.';
   }
 
   // ==========================================
-  // PART 4: AI FBD VECTOR EVALUATOR (3 CASES)
+  // PART 4: FBD CHALLENGE & AI EVALUATOR
   // ==========================================
   const fbdCanvas = document.getElementById('fbdCanvas');
   const fbdCtx = fbdCanvas.getContext('2d');
-  let fbdArrows = [];
-  let isDrawingFbd = false;
-  let fbdEnd = {x:0, y:0};
+  let fbdArrows = [], isDrawingFbd = false, fbdEnd = {x:0, y:0};
   const fbdCenter = {x:300, y:170};
   let currentCase = 0;
 
-// Definisikan ideal rasio panjang terhadap Weight (W). W akan selalu menjadi referensi (rasio = 1)
   const fbdCases = [
-    { title: "Case 1: Book Resting on a Flat Table", desc: "Draw Weight (W) and Normal Force (N). Ensure N and W have the SAME length.",
-      ideals: [
-        {ang: Math.PI/2, val: 'W', ratio: 1.0}, 
-        {ang: -Math.PI/2, val: 'N', ratio: 1.0} // Panjang harus sama dgn W
-      ] 
-    },
-    { title: "Case 2: Box Pushed Right on Rough Floor (Constant Velocity)", desc: "Draw Weight (W), Normal (N), Applied Force (Right), and Friction (Left). N = W, and f = F.",
-      ideals: [
-        {ang: Math.PI/2, val: 'W', ratio: 1.0}, 
-        {ang: -Math.PI/2, val: 'N', ratio: 1.0}, 
-        {ang: 0, val: 'F', ratio: null}, // ratio null berarti panjangnya bebas asalkan ada
-        {ang: Math.PI, val: 'f', ratio: 'match_F'} // f harus sepanjang F
-      ]
-    },
-    { title: "Case 3: Block Sliding Down a Rough Incline (30°)", desc: "Draw Weight (Straight down), Normal (Perpendicular up-left), Friction (Parallel up-right). N must be shorter than W (N = W cos 30°).",
-      ideals: [
-        {ang: Math.PI/2, val: 'W', ratio: 1.0}, 
-        {ang: -Math.PI/2 - Math.PI/6, val: 'N', ratio: 0.866}, // N lebih pendek dari W
-        {ang: -Math.PI/6, val: 'f', ratio: null}
-      ]
-    }
+    { title: "Case 1: Book Resting on a Flat Table", desc: "Draw Weight (W) and Normal Force (N). Ensure N and W have the SAME length.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2, val: 'N', ratio: 1.0}] },
+    { title: "Case 2: Box Pushed Right on Rough Floor (Constant Velocity)", desc: "Draw Weight (W), Normal (N), Applied Force (Right), and Friction (Left). N = W, and f = F.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2, val: 'N', ratio: 1.0}, {ang: 0, val: 'F', ratio: null}, {ang: Math.PI, val: 'f', ratio: 'match_F'}] },
+    { title: "Case 3: Block Sliding Down a Rough Incline (30°)", desc: "Draw Weight (Straight down), Normal (Perpendicular up-left), Friction (Parallel up-right). N must be shorter than W.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2 - Math.PI/6, val: 'N', ratio: 0.866}, {ang: -Math.PI/6, val: 'f', ratio: null}] }
   ];
-  
+
   function loadCase(idx) {
-    currentCase = idx;
-    fbdArrows = [];
+    currentCase = idx; fbdArrows = [];
     document.getElementById('fbdCaseNum').innerText = idx + 1;
     document.getElementById('fbdScenarioTitle').innerText = fbdCases[idx].title;
     document.getElementById('fbdScenarioDesc').innerText = fbdCases[idx].desc;
@@ -571,48 +478,64 @@ function drawSim() {
     renderFBD();
   }
 
-function renderFBD() {
+  function renderFBD() {
     fbdCtx.clearRect(0,0,fbdCanvas.width, fbdCanvas.height);
     
-    if(currentCase === 2) { // Case Incline
-      // Gambar bidang miring tepat melewati bawah alas kotak
-      fbdCtx.fillStyle = '#e0e0e0'; fbdCtx.beginPath(); 
-      // Posisi fbdCenter adalah 300, 170. Alas kotak berada di y+30 = 200 (sebelum rotasi).
-      // Kita buat garis kemiringan melewati (300, 170)
-      fbdCtx.save();
+    if(currentCase === 2) { 
+      fbdCtx.fillStyle = '#e0e0e0'; fbdCtx.save();
       fbdCtx.translate(fbdCenter.x, fbdCenter.y + 30);
       fbdCtx.rotate(-Math.PI/6);
-      fbdCtx.fillRect(-200, 0, 400, 150); // Gambar bidang lantai
+      fbdCtx.fillRect(-200, 0, 400, 150); 
       fbdCtx.restore();
-    } else { // Case Flat
+    } else { 
       fbdCtx.fillStyle = '#e0e0e0'; fbdCtx.fillRect(150, fbdCenter.y + 30, 300, 50);
     }
     
-    // Draw Box
     fbdCtx.save();
     fbdCtx.translate(fbdCenter.x, fbdCenter.y);
     if(currentCase === 2) fbdCtx.rotate(-Math.PI/6);
-    fbdCtx.fillStyle = '#1a5f7a'; fbdCtx.fillRect(-30, -30, 60, 60); // Alas kotak ada di +30
+    fbdCtx.fillStyle = '#1a5f7a'; fbdCtx.fillRect(-30, -30, 60, 60); 
     fbdCtx.restore();
 
-    // Center point
     fbdCtx.beginPath(); fbdCtx.arc(fbdCenter.x, fbdCenter.y, 5, 0, Math.PI*2); fbdCtx.fillStyle = '#ff4d4d'; fbdCtx.fill();
     
     fbdArrows.forEach(a => drawArrow(fbdCtx, fbdCenter.x, fbdCenter.y, a.x, a.y, '#007bff', ''));
     if(isDrawingFbd) drawArrow(fbdCtx, fbdCenter.x, fbdCenter.y, fbdEnd.x, fbdEnd.y, '#ffc107', '');
   }
 
-  // PENILAIAN AI FBD (Arah + Panjang)
+  fbdCanvas.addEventListener('mousedown', e => {
+    let r = fbdCanvas.getBoundingClientRect();
+    let mouseX = e.clientX - r.left; let mouseY = e.clientY - r.top;
+    if(Math.hypot(mouseX - fbdCenter.x, mouseY - fbdCenter.y) < 40) {
+      isDrawingFbd = true; fbdEnd = {x: mouseX, y: mouseY};
+    }
+  });
+  
+  fbdCanvas.addEventListener('mousemove', e => {
+    if(!isDrawingFbd) return;
+    let r = fbdCanvas.getBoundingClientRect();
+    fbdEnd = {x: e.clientX - r.left, y: e.clientY - r.top}; 
+    renderFBD();
+  });
+  
+  fbdCanvas.addEventListener('mouseup', () => {
+    if(isDrawingFbd) {
+      if(Math.hypot(fbdEnd.x - fbdCenter.x, fbdEnd.y - fbdCenter.y) > 20) {
+        fbdArrows.push({x: fbdEnd.x, y: fbdEnd.y});
+      }
+      isDrawingFbd = false; renderFBD();
+    }
+  });
+
+  document.getElementById('fbdClearBtn').onclick = () => { fbdArrows = []; renderFBD(); };
+  document.getElementById('fbdNextBtn').onclick = () => loadCase(currentCase + 1);
+  
   document.getElementById('fbdCheckBtn').onclick = () => {
     const fb = document.getElementById('fbdFeedback');
     let ideals = fbdCases[currentCase].ideals;
     let feedbackMsgs = [];
-    
-    let wLength = 0;
-    let fLength = 0;
-    let matchedVectors = {}; // Menyimpan data panah yang digambar user sesuai tipenya
+    let wLength = 0, fLength = 0, matchedVectors = {}; 
 
-    // 1. Identifikasi arah dan hitung panjang
     ideals.forEach(ideal => {
       for(let i=0; i<fbdArrows.length; i++) {
         let uAng = Math.atan2(fbdArrows[i].y - fbdCenter.y, fbdArrows[i].x - fbdCenter.x);
@@ -629,15 +552,12 @@ function renderFBD() {
       if(!matchedVectors[ideal.val]) feedbackMsgs.push(`Missing/wrong direction for ${ideal.val}`);
     });
 
-    // 2. Evaluasi Panjang (HOTS) jika semua arah benar
     if (feedbackMsgs.length === 0) {
       ideals.forEach(ideal => {
         if (ideal.val === 'N' && wLength > 0) {
           let userRatio = matchedVectors['N'] / wLength;
-          let expectedRatio = ideal.ratio;
-          // Toleransi panjang 15%
-          if (Math.abs(userRatio - expectedRatio) > 0.15) {
-             if (expectedRatio === 1) feedbackMsgs.push(`Normal (N) length must equal Weight (W)`);
+          if (Math.abs(userRatio - ideal.ratio) > 0.15) {
+             if (ideal.ratio === 1) feedbackMsgs.push(`Normal (N) length must equal Weight (W)`);
              else feedbackMsgs.push(`Normal (N) must be shorter than Weight (W) based on incline angle`);
           }
         }
@@ -655,7 +575,7 @@ function renderFBD() {
       fb.className = 'feedback-box feedback-success';
       fb.innerHTML = '<strong>Perfect!</strong> All force vectors have the correct direction AND proportional magnitudes!';
       sendGroupDataAsync("Part 4 - FBD", `Case_${currentCase+1}`, "Correct Vectors & Length", "100");
-      if (currentCase === 2) completionStatus.part4 = true; // Set selesai jika pass case 3
+      if (currentCase === 2) completionStatus.part4 = true; 
     } else {
       fb.className = 'feedback-box feedback-error';
       fb.innerHTML = `<strong>Review Needed:</strong><br>- ` + feedbackMsgs.join('<br>- ');
@@ -663,7 +583,8 @@ function renderFBD() {
     }
   };
 
-  loadCase(0); // Init FBD
+  loadCase(0); // Init Draw
+  drawSim(); // Init Sim
 </script>
 </body>
 </html>
