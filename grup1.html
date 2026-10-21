@@ -42,7 +42,7 @@
     canvas { background: #eef7fc; border: 2px solid #bce1f3; border-radius: 8px; display: block; margin: 0 auto; max-width: 100%; }
     .sim-controls { flex: 1; min-width: 250px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
     .q-item { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-    textarea, input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 0.95em; resize: vertical; }
     
     /* UTILS */
     .btn { padding: 10px 20px; border: none; border-radius: 6px; background: var(--secondary-color); color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: opacity 0.2s; }
@@ -69,14 +69,14 @@
     <p>Watch the video and answer the questions on the right. You can answer them as you watch!</p>
     
     <div class="video-quiz-layout">
-      <!-- Kiri: Video -->
+      <!-- Left: Video -->
       <div class="video-section">
         <div class="video-container">
           <iframe src="https://www.youtube.com/embed/IBDk8Opqn8E" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
       </div>
       
-      <!-- Kanan: Scrollable Quiz -->
+      <!-- Right: Scrollable Quiz -->
       <div class="quiz-section" id="quizContainer">
         <div id="videoQuestionsWrapper"></div>
         <button class="btn" id="submitVideoAnsBtn" style="width: 100%; margin-top: 15px;">Submit All Answers</button>
@@ -88,25 +88,26 @@
   <!-- SECTION 2: FLASHCARDS -->
   <div class="section-content" id="sec-1">
     <h2>Section 2: The 6 Types of Forces</h2>
+    <p>Click on the cards to reveal the definitions of fundamental forces.</p>
     <div class="flashcards-grid" id="flashcardsContainer"></div>
     
     <hr style="margin: 30px 0;">
     <h3>Force Identification Challenge</h3>
     
     <div class="story-quiz">
-      <p><strong>Story 1:</strong> A submarine is moving forward horizontally deep underwater at a constant speed. Which of the following forces are acting on the submarine? (Select all that apply)</p>
+      <p><strong>Story 1:</strong> A hot air balloon is rising vertically at a constant speed as the pilot heats the air inside the envelope. Which forces are acting on the balloon as it moves up? (Select all that apply)</p>
       <div id="story1-options">
         <label><input type="checkbox" value="Upthrust"> Upthrust</label><br>
         <label><input type="checkbox" value="Tension"> Tension</label><br>
         <label><input type="checkbox" value="Gravitational"> Gravitational</label><br>
         <label><input type="checkbox" value="Normal"> Normal</label><br>
-        <label><input type="checkbox" value="Frictional"> Frictional (Solid surface)</label><br>
-        <label><input type="checkbox" value="Drag"> Drag</label>
+        <label><input type="checkbox" value="Frictional"> Frictional</label><br>
+        <label><input type="checkbox" value="Drag"> Drag (Air Resistance)</label>
       </div>
     </div>
 
     <div class="story-quiz">
-      <p><strong>Story 2:</strong> A car slams on its brakes and slides along a rough, flat horizontal road. Which forces are acting on the car as it slides? (Select all that apply)</p>
+      <p><strong>Story 2:</strong> A heavy construction crate is being pulled up a rough, inclined wooden ramp at a constant acceleration by a steel cable. Which forces are acting on the crate as it slides? (Select all that apply)</p>
       <div id="story2-options">
         <label><input type="checkbox" value="Upthrust"> Upthrust</label><br>
         <label><input type="checkbox" value="Tension"> Tension</label><br>
@@ -123,7 +124,8 @@
 
   <!-- SECTION 3: SIMULATION -->
   <div class="section-content" id="sec-2">
-    <h2>Section 3: Inclined Plane Interactive Lab</h2>
+    <h2>Section 3: Simulation Lab</h2>
+    <p>Adjust the variables on the right to observe how they affect the physical system.</p>
     <div class="sim-layout">
       <div>
         <canvas id="simCanvas" width="500" height="340"></canvas>
@@ -152,34 +154,43 @@
     </div>
 
     <hr style="margin: 30px 0;">
-    <h3>Simulation Analytical Questions</h3>
+    <h3>Analytical Questions</h3>
     <form id="simQuizForm">
-      <div class="q-item"><label>1. Set &theta; = 0&deg;, m = 10 kg. Normal Force (N):</label><input type="text" id="sq1"></div>
-      <div class="q-item"><label>2. Increasing &theta; from 0&deg; to 45&deg; causes Normal Force to:</label><input type="text" id="sq2"></div>
-      <div class="q-item"><label>3. At &theta; = 30&deg;, m = 5 kg, calculate parallel weight component (W<sub>x</sub>):</label><input type="text" id="sq3"></div>
-      <div class="q-item"><label>4. With &mu; = 0.2, m = 5 kg at &theta; = 0&deg;, calculate max static friction (f<sub>s</sub>):</label><input type="text" id="sq4"></div>
-      <div class="q-item"><label>5. Acceleration (a) when applied force equals resistive forces:</label><input type="text" id="sq5"></div>
-      <div class="q-item"><label>6. Why does increasing inclination &theta; decrease maximum static friction?</label><textarea id="sq6" rows="2"></textarea></div>
-      <div class="q-item"><label>7. Equation for pushing a block UPWARD at constant velocity (&Sigma;F = 0):</label><textarea id="sq7" rows="2"></textarea></div>
+      <div class="q-item">
+        <label>1. Analyze the relationship between the angle of inclination and the acceleration of an object sliding down a rough inclined plane.</label>
+        <textarea id="sq1" rows="4" placeholder="Enter your detailed analysis here..."></textarea>
+      </div>
+      <div class="q-item">
+        <label>2. Conduct a simulation inquiry to determine the direction and magnitude of friction under varying factors!</label>
+        <textarea id="sq2" rows="4" placeholder="Describe your findings here..."></textarea>
+      </div>
+      <div class="q-item">
+        <label>3. For an applied force vector oriented at an arbitrary angle relative to an inclined plane, determine the theoretical expression for the normal force. How does increasing the force angle affect both the normal force and the acceleration of an object?</label>
+        <textarea id="sq3" rows="4" placeholder="Enter theoretical expressions and your explanation..."></textarea>
+      </div>
+      <div class="q-item">
+        <label>4. Given an inclined plane at 20&deg;, applied force angle at 10&deg;, mass = 5 kg, and applied force = 40 N, find the coefficient of friction &mu; such that acceleration a = 2.57 m/s&sup2;!</label>
+        <textarea id="sq4" rows="4" placeholder="Show your calculations here..."></textarea>
+      </div>
       <button type="button" class="btn" onclick="evaluateSimQuiz()">Submit Lab Answers</button>
     </form>
     <div id="simFeedback" class="feedback-box"></div>
   </div>
 
-  <!-- SECTION 4: FBD DRAWING QUIZ & REFLECTION -->
+  <!-- SECTION 4: FBD DRAWING QUIZ -->
   <div class="section-content" id="sec-3">
-    <h2>Section 4: Advanced FBD Vector Drawing</h2>
+    <h2>Section 4: FBD Challenge</h2>
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h3 id="fbdScenarioTitle">Case 1: Book Resting on a Flat Table</h3>
       <span style="font-weight:bold; color:var(--primary-color);">Case <span id="fbdCaseNum">1</span>/3</span>
     </div>
-    <p id="fbdScenarioDesc">Draw Weight (W) and Normal Force (N). Ensure N and W have the SAME length.</p>
+    <p id="fbdScenarioDesc">Draw a complete FBD labeling all acting forces. Ensure all vector magnitudes correctly reflect equilibrium.</p>
     
     <div style="margin: 15px 0;">
       <canvas id="fbdCanvas" width="600" height="340" style="cursor: crosshair;"></canvas>
     </div>
     <div style="text-align:center;">
-      <button class="btn" id="fbdCheckBtn">Verify Vectors (AI)</button>
+      <button class="btn" id="fbdCheckBtn">Verify Vectors</button>
       <button class="btn" style="background:#dc3545;" id="fbdClearBtn">Clear Vectors</button>
       <button class="btn" style="background:#28a745; display:none;" id="fbdNextBtn">Next Case &rarr;</button>
     </div>
@@ -189,7 +200,7 @@
     <hr style="margin: 40px 0;">
     <div style="text-align: center; padding: 20px; background: #eef7fc; border-radius: 10px;">
       <h3>End Learning Session</h3>
-      <p>Please ensure you have completed Concept Check (Part 2), Lab Simulation (Part 3), and FBD Challenge (Part 4) before proceeding.</p>
+      <p>Please ensure you have completed all sections before proceeding.</p>
       <button class="btn" id="reflectionBtn" style="background: #6f42c1; font-size: 1.1em; padding: 12px 25px;">Proceed to Reflection</button>
     </div>
   </div>
@@ -252,14 +263,14 @@
   };
 
   // ==========================================
-  // PART 1: VIDEO QUIZ (GUIDED VIEWING)
+  // PART 1: VIDEO QUIZ
   // ==========================================
   const videoQuizzes = [
     { id: "Video_Q1", type: "single", question: "1. What is the primary purpose of constructing a Free Body Diagram (FBD)?", options: ["Calculate final velocity directly", "Isolate a single object and show all external forces", "Measure mass and volume", "Trace motion trajectory without forces"], correct: [1] },
-    { id: "Video_Q3", type: "single", question: "2. In what direction does the weight (W) force always act on an object, regardless of the slope?", options: ["Parallel to the slope", "Perpendicular to the surface", "Vertically downwards", "Horizontally opposite to thrust"], correct: [2] },
-    { id: "Video_Q4", type: "multiple", question: "3. Which forces act on an aircraft during steady, level flight? (Select ALL that apply)", options: ["Weight (downwards)", "Lift (upwards)", "Thrust (forward)", "Drag (opposing forward motion)"], correct: [0, 1, 2, 3] },
-    { id: "Video_Q5", type: "single", question: "4. For a boat floating in equilibrium on water, what is the relationship between its weight and upthrust?", options: ["Upthrust is greater than weight", "Upthrust is equal in magnitude to weight", "Weight is greater than upthrust", "Upthrust is zero"], correct: [1] },
-    { id: "Video_Q2", type: "single", question: "5. On an inclined plane, which component of weight presses PERPENDICULARLY against the surface?", options: ["Wx = W &middot; sin(&theta;)", "Wy = W &middot; cos(&theta;)", "Frictional Force (f)", "Applied Force (F)"], correct: [1] }
+    { id: "Video_Q2", type: "multiple", question: "2. Select the three distinct forces present in a free body diagram for a block stationary on an inclined plane. (Select 3 choices)", options: ["Weight (W) acting vertically downwards", "Normal contact force acting perpendicular to the slope", "Friction acting up the slope", "Thrust force pushing up the slope", "Upthrust from displacement"], correct: [0, 1, 2] },
+    { id: "Video_Q3", type: "single", question: "3. What is the angle between the Normal Contact Force and the Frictional Force acting on a block on an inclined slope?", options: ["Equal to the slope angle", "45&deg;", "90&deg;", "180&deg;"], correct: [2] },
+    { id: "Video_Q4", type: "single", question: "4. For a boat floating in equilibrium on water, what is the relationship between its weight and the upthrust force?", options: ["Upthrust is greater than weight to keep it afloat", "Upthrust is equal in magnitude to weight", "Weight is greater than upthrust", "Upthrust is zero because the boat is at rest"], correct: [1] },
+    { id: "Video_Q5", type: "multiple", question: "5. An object resting on a slope of angle &theta; is in static equilibrium (no resultant force). Which of the following statements accurately describe the resolving component equations? (Select ALL that apply)", options: ["The component of weight acting down the slope (W) equals the frictional force acting up the slope.", "The component of weight acting perpendicular to the slope (W) equals the normal contact force.", "The normal contact force equals the total weight W.", "Frictional force equals total weight W."], correct: [0, 1] }
   ];
 
   function renderVideoQuizzes() {
@@ -281,7 +292,6 @@
     let allAnswered = true;
     let totalScore = 0;
 
-    // Validation check
     videoQuizzes.forEach((q, qIndex) => {
       let checked = document.querySelectorAll(`input[name="vq_${qIndex}"]:checked`);
       if (checked.length === 0) allAnswered = false;
@@ -295,7 +305,6 @@
     document.getElementById('submitVideoAnsBtn').disabled = true;
     document.getElementById('submitVideoAnsBtn').innerText = "Submitting...";
 
-    // Grading and sending data
     for (let qIndex = 0; qIndex < videoQuizzes.length; qIndex++) {
       let q = videoQuizzes[qIndex];
       let checkedNodes = document.querySelectorAll(`input[name="vq_${qIndex}"]:checked`);
@@ -340,16 +349,18 @@
     let s1 = Array.from(document.querySelectorAll('#story1-options input:checked')).map(cb => cb.value);
     let s2 = Array.from(document.querySelectorAll('#story2-options input:checked')).map(cb => cb.value);
     
+    // Logic for Balloon: Upthrust, Gravitational, Drag
     let s1Correct = s1.includes('Upthrust') && s1.includes('Gravitational') && s1.includes('Drag') && s1.length === 3;
-    let s2Correct = s2.includes('Normal') && s2.includes('Gravitational') && s2.includes('Frictional') && s2.length <= 4;
+    // Logic for Crate on ramp: Tension, Gravitational, Normal, Frictional
+    let s2Correct = s2.includes('Tension') && s2.includes('Normal') && s2.includes('Gravitational') && s2.includes('Frictional') && s2.length === 4;
 
-    sendGroupData("Part 2 - Story", "Story_Submarine", s1.join(", "), s1Correct ? "Correct" : "Incorrect");
-    sendGroupData("Part 2 - Story", "Story_BrakingCar", s2.join(", "), s2Correct ? "Correct" : "Incorrect");
+    sendGroupData("Part 2 - Story", "Story_Balloon", s1.join(", "), s1Correct ? "Correct" : "Incorrect");
+    sendGroupData("Part 2 - Story", "Story_Crate", s2.join(", "), s2Correct ? "Correct" : "Incorrect");
 
     let fb = document.getElementById('storyFeedback');
     fb.style.display = 'block';
     fb.className = 'feedback-box feedback-success';
-    fb.innerHTML = `<strong>Responses Recorded!</strong><br>Story 1: ${s1Correct?'Perfect!':'Review fluid forces.'}<br>Story 2: ${s2Correct?'Excellent!':'Remember ground interactions.'}`;
+    fb.innerHTML = `<strong>Responses Recorded!</strong> Data has been successfully submitted to the system.`;
     
     completionStatus.part2 = true;
   }
@@ -458,14 +469,14 @@
     document.getElementById('simFeedback').className = 'feedback-box';
     document.getElementById('simFeedback').innerHTML = '<em>Saving data... Please wait.</em>';
     
-    for(let i=1; i<=7; i++) {
+    for(let i=1; i<=4; i++) {
       let ans = document.getElementById(`sq${i}`).value;
-      await sendGroupDataAsync("Part 3 - Simulation", `Sim_Q${i}`, ans, "Logged");
+      await sendGroupDataAsync("Part 3 - Simulation", `Sim_Analytic_Q${i}`, ans, "Logged");
     }
     
     completionStatus.part3 = true; 
     document.getElementById('simFeedback').className = 'feedback-box feedback-success';
-    document.getElementById('simFeedback').innerHTML = '<strong>Lab Data Submitted!</strong> All responses have been successfully recorded.';
+    document.getElementById('simFeedback').innerHTML = '<strong>Lab Data Submitted!</strong> All analytical responses have been successfully recorded.';
   }
 
   // ==========================================
@@ -478,9 +489,9 @@
   let currentCase = 0;
 
   const fbdCases = [
-    { title: "Case 1: Book Resting on a Flat Table", desc: "Draw Weight (W) and Normal Force (N). Ensure N and W have the SAME length.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2, val: 'N', ratio: 1.0}] },
-    { title: "Case 2: Box Pushed Right on Rough Floor (Constant Velocity)", desc: "Draw Weight (W), Normal (N), Applied Force (Right), and Friction (Left). N = W, and f = F.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2, val: 'N', ratio: 1.0}, {ang: 0, val: 'F', ratio: null}, {ang: Math.PI, val: 'f', ratio: 'match_F'}] },
-    { title: "Case 3: Block Sliding Down a Rough Incline (30°)", desc: "Draw Weight (Straight down), Normal (Perpendicular up-left), Friction (Parallel up-right). N must be shorter than W.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2 - Math.PI/6, val: 'N', ratio: 0.866}, {ang: -Math.PI/6, val: 'f', ratio: null}] }
+    { title: "Case 1: Book Resting on a Flat Table", desc: "Draw a complete FBD labeling all acting forces. Ensure all vector magnitudes correctly reflect equilibrium.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2, val: 'N', ratio: 1.0}] },
+    { title: "Case 2: Box Pushed Right on Rough Floor (Constant Velocity)", desc: "Draw a complete FBD including all acting forces.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2, val: 'N', ratio: 1.0}, {ang: 0, val: 'F', ratio: null}, {ang: Math.PI, val: 'f', ratio: 'match_F'}] },
+    { title: "Case 3: Block Sliding Down a Rough Incline (30°)", desc: "Draw a complete FBD including all acting forces.", ideals: [{ang: Math.PI/2, val: 'W', ratio: 1.0}, {ang: -Math.PI/2 - Math.PI/6, val: 'N', ratio: 0.866}, {ang: -Math.PI/6, val: 'f', ratio: null}] }
   ];
 
   function loadCase(idx) {
