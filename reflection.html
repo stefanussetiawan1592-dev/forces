@@ -22,7 +22,7 @@
       line-height: 1.6;
     }
     .container {
-      max-width: 850px;
+      max-width: 950px;
       margin: 30px auto;
       padding: 0 20px;
     }
@@ -30,13 +30,13 @@
       background: var(--primary);
       color: white;
       text-align: center;
-      padding: 30px 20px;
+      padding: 25px 20px;
       border-radius: 12px;
       margin-bottom: 25px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    header h1 { margin: 0; font-size: 2.2rem; }
-    header p { margin-top: 10px; opacity: 0.9; }
+    header h1 { margin: 0; font-size: 2rem; }
+    header p { margin-top: 8px; opacity: 0.9; }
 
     .card {
       background: var(--card-bg);
@@ -45,10 +45,10 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
       margin-bottom: 25px;
     }
-    h2 { color: var(--primary); margin-top: 0; }
+    h2 { color: var(--primary); margin-top: 0; font-size: 1.4rem; }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
     label {
       display: block;
@@ -63,7 +63,7 @@
       border-radius: 6px;
       font-family: inherit;
       font-size: 0.95rem;
-      box-sizing: border-border;
+      box-sizing: border-box;
     }
     textarea { resize: vertical; }
 
@@ -81,41 +81,46 @@
     .btn:hover { opacity: 0.9; }
     .btn:disabled { background: #ccc; cursor: not-allowed; }
 
-    /* PEER COMMENTS BOARD */
+    /* GRID LAYOUT FOR PEER COMMENTS BOARD (2 COLUMNS) */
     .comments-board {
       margin-top: 30px;
     }
+    .comments-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
     .comment-item {
       background: #f8f9fa;
-      border-left: 5px solid var(--secondary);
-      padding: 18px;
+      border-top: 4px solid var(--secondary);
+      padding: 15px;
       border-radius: 8px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     .comment-header {
       display: flex;
       justify-content: space-between;
       font-weight: bold;
       color: var(--primary);
-      margin-bottom: 10px;
-      border-bottom: 1px solid #e0e0e0;
-      padding-bottom: 5px;
+      margin-bottom: 8px;
+      border-bottom: 1px dashed #ddd;
+      padding-bottom: 6px;
+      font-size: 0.95rem;
     }
     .comment-time {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: #777;
       font-weight: normal;
     }
-    .comment-section-title {
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: #555;
-      margin-top: 8px;
-    }
     .comment-text {
-      margin: 4px 0 12px 0;
+      margin: 6px 0 0 0;
       color: #444;
+      font-size: 0.92rem;
+      white-space: pre-line; /* Preserves student line breaks */
     }
   </style>
 </head>
@@ -127,7 +132,7 @@
     <p>Share your learning insights and explore what your classmates have discovered!</p>
   </header>
 
-  <!-- REFLECTION FORM -->
+  <!-- REFLECTION FORM (SINGLE PROMPT) -->
   <div class="card">
     <h2>Post Your Reflection</h2>
     <form id="reflectionForm">
@@ -137,25 +142,24 @@
       </div>
 
       <div class="form-group">
-        <label for="qUnderstanding">1. Do I fully understand Free Body Diagrams (FBD) and the different types of forces?</label>
-        <textarea id="qUnderstanding" rows="4" placeholder="Explain what you have mastered or where you still feel confused..." required></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="qCuriosity">2. What interesting questions or phenomena would I like to explore further regarding this topic?</label>
-        <textarea id="qCuriosity" rows="4" placeholder="Share anything intriguing you want to discover next..." required></textarea>
+        <label for="qReflection">Reflect on your learning journey:</label>
+        <p style="margin-top: -4px; margin-bottom: 8px; font-size: 0.9rem; color: #666;">
+          <em>Do you fully understand Free Body Diagrams (FBD) and force types? What interesting questions or phenomena would you like to explore further?</em>
+        </p>
+        <textarea id="qReflection" rows="5" placeholder="Write your reflection and thoughts here..." required></textarea>
       </div>
 
       <button type="submit" class="btn" id="submitBtn">Submit & Share Reflection</button>
     </form>
   </div>
 
-  <!-- PEER REFLECTIONS DISPLAY BOARD -->
+  <!-- PEER REFLECTIONS DISPLAY BOARD (2 COLUMNS GRID) -->
   <div class="card comments-board">
     <h2>💬 Peer Reflection Wall</h2>
-    <p>Read reflections submitted by your peers below:</p>
-    <div id="reflectionList">
-      <p style="text-align: center; color: #777;"><em>Loading reflections...</em></p>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Read reflections submitted by your peers below:</p>
+    
+    <div id="reflectionGrid" class="comments-grid">
+      <p style="grid-column: 1 / -1; text-align: center; color: #777;"><em>Loading reflections...</em></p>
     </div>
   </div>
 </div>
@@ -197,23 +201,20 @@
     submitBtn.innerText = "Publishing...";
 
     const name = document.getElementById('studentName').value.trim();
-    const understanding = document.getElementById('qUnderstanding').value.trim();
-    const curiosity = document.getElementById('qCuriosity').value.trim();
+    const reflection = document.getElementById('qReflection').value.trim();
     const timestamp = new Date().toLocaleString();
 
     // Save student name locally
     localStorage.setItem('studentName', name);
 
-    // Push comment object to Firebase Realtime Database
+    // Push combined reflection object to Firebase
     db.ref('reflections').push({
       name: name,
-      understanding: understanding,
-      curiosity: curiosity,
+      reflection: reflection,
       timestamp: timestamp
     }).then(() => {
       alert("Reflection successfully posted!");
-      document.getElementById('reflectionForm').reset();
-      document.getElementById('studentName').value = name; // Restore name
+      document.getElementById('qReflection').value = ""; // Clear textarea
       submitBtn.disabled = false;
       submitBtn.innerText = "Submit & Share Reflection";
     }).catch((error) => {
@@ -223,14 +224,14 @@
     });
   });
 
-  // Listen to Firebase and render comments live (Realtime)
+  // Listen to Firebase and render comments live in 2-column Grid
   db.ref('reflections').on('value', (snapshot) => {
-    const listContainer = document.getElementById('reflectionList');
-    listContainer.innerHTML = "";
+    const gridContainer = document.getElementById('reflectionGrid');
+    gridContainer.innerHTML = "";
 
     const data = snapshot.val();
     if (!data) {
-      listContainer.innerHTML = "<p style='text-align: center; color: #777;'><em>No reflections submitted yet. Be the first to share!</em></p>";
+      gridContainer.innerHTML = "<p style='grid-column: 1 / -1; text-align: center; color: #777;'><em>No reflections submitted yet. Be the first to share!</em></p>";
       return;
     }
 
@@ -244,15 +245,10 @@
             <span>👤 ${escapeHtml(item.name)}</span>
             <span class="comment-time">🕒 ${escapeHtml(item.timestamp || '')}</span>
           </div>
-          
-          <div class="comment-section-title">💡 Understanding & Mastery:</div>
-          <p class="comment-text">${escapeHtml(item.understanding)}</p>
-          
-          <div class="comment-section-title">🔍 Further Curiosity & Questions:</div>
-          <p class="comment-text">${escapeHtml(item.curiosity)}</p>
+          <p class="comment-text">${escapeHtml(item.reflection)}</p>
         </div>
       `;
-      listContainer.innerHTML += cardHtml;
+      gridContainer.innerHTML += cardHtml;
     });
   });
 
