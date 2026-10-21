@@ -383,7 +383,7 @@
 
 async function callGeminiAPI(userQuery) {
   // Menggunakan model gemini-1.5-flash yang stabil
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   
   const promptSystem = `You are an encouraging and concise Physics Tutor Assistant for high school students. 
 Your goal is to answer student queries specifically about Forces and Free Body Diagrams (FBD). 
