@@ -47,27 +47,29 @@
     }
     h2 { color: var(--primary); margin-top: 0; }
 
-    /* VISUAL GALLERY */
-    .gallery {
+    /* ESSENTIAL GUIDING QUESTIONS */
+    .questions-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
       margin: 20px 0;
     }
-    .gallery-item {
-      text-align: center;
+    .question-card {
       background: #eef7fc;
-      padding: 15px;
+      padding: 20px;
       border-radius: 10px;
-      border: 1px solid #bce1f3;
+      border-left: 5px solid var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
-    .gallery-item img {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      border-radius: 8px;
+    .question-card div {
+      font-size: 2rem;
+      margin-bottom: 10px;
     }
-    .gallery-item h4 { margin: 10px 0 5px 0; color: var(--primary); }
+    .question-card p {
+      margin: 0;
+      font-weight: 600;
+      color: #2c3e50;
+    }
 
     /* EMOTION & CONFIDENCE CHECK */
     .checkin-container {
@@ -79,10 +81,11 @@
     .emoji-group {
       display: flex;
       justify-content: center;
-      gap: 25px;
+      gap: 20px;
+      flex-wrap: wrap;
     }
     .emoji-btn {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       background: none;
       border: 2px solid transparent;
       border-radius: 50%;
@@ -118,6 +121,7 @@
       width: 15px;
       background: repeating-linear-gradient(0deg, #000, #000 10px, #fff 10px, #fff 20px);
     }
+    /* MIRRORED CAR SPRITE */
     .car {
       position: absolute;
       left: 10px;
@@ -125,6 +129,8 @@
       font-size: 2.5rem;
       transition: left 0.1s linear;
       user-select: none;
+      transform: scaleX(-1); /* Flips car horizontally to face right */
+      display: inline-block;
     }
     .game-controls {
       display: flex;
@@ -151,43 +157,41 @@
 <div class="container">
   <header>
     <h1>🚀 Physics Readiness & Warm-Up</h1>
-    <p>Welcome! Let's refresh our understanding of Forces before starting our mission.</p>
+    <p>Welcome! Let's activate your curiosity before starting our forces mission.</p>
   </header>
 
-  <!-- VISUAL REVIEW -->
+  <!-- PERTANYAAN PEMATIK (ESSENTIAL QUESTIONS) -->
   <div class="card">
-    <h2>1. Forces in Everyday Life</h2>
-    <p>Forces are everywhere around us! Here is a quick reminder of how forces act in the real world:</p>
-    <div class="gallery">
-      <div class="gallery-item">
-        <img src="https://images.unsplash.com/photo-1540829016269-e05670f88adb?auto=format&fit=crop&w=400&q=80" alt="Tension Force">
-        <h4>Tension Force</h4>
-        <p>Pulling force applied through ropes or cables.</p>
+    <h2>1. Have You Ever Wondered?</h2>
+    <p>Physics is all around us, explaining the mysteries of motion and forces!</p>
+    <div class="questions-grid">
+      <div class="question-card">
+        <div>🎢</div>
+        <p>"Have you wondered how a roller coaster can move in a loop without falling?"</p>
       </div>
-      <div class="gallery-item">
-        <img src="https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=400&q=80" alt="Gravitational Force">
-        <h4>Gravitational Force</h4>
-        <p>Pulling objects straight downwards toward Earth.</p>
+      <div class="question-card">
+        <div>🪂</div>
+        <p>"Have you wondered how a parachute can slow down parachuters safely?"</p>
       </div>
-      <div class="gallery-item">
-        <img src="https://images.unsplash.com/photo-1563889958749-81347094a96b?auto=format&fit=crop&w=400&q=80" alt="Frictional Force">
-        <h4>Frictional Force</h4>
-        <p>Opposing the relative motion between surfaces.</p>
+      <div class="question-card">
+        <div>🎈</div>
+        <p>"How can a hot air balloon move upwards into the atmosphere?"</p>
       </div>
     </div>
   </div>
 
-  <!-- READINESS & FEELINGS -->
+  <!-- READINESS & EMOTION CHECK -->
   <div class="card">
     <h2>2. Readiness Check</h2>
     <div class="checkin-container">
       <div>
-        <p><strong>How are you feeling about starting this physics session?</strong></p>
+        <p style="text-align: center;"><strong>How are you feeling about starting this physics session?</strong></p>
         <div class="emoji-group">
-          <button class="emoji-btn" onclick="selectEmoji(this, 'Excited')">🤩</button>
-          <button class="emoji-btn" onclick="selectEmoji(this, 'Confident')">😎</button>
-          <button class="emoji-btn" onclick="selectEmoji(this, 'Neutral')">🙂</button>
-          <button class="emoji-btn" onclick="selectEmoji(this, 'Anxious')">Slightly Nervous 😰</button>
+          <button class="emoji-btn" onclick="selectEmoji(this, 'Fire/Fired Up')" title="Fired Up!">🔥</button>
+          <button class="emoji-btn" onclick="selectEmoji(this, 'Excited')" title="Excited">🤩</button>
+          <button class="emoji-btn" onclick="selectEmoji(this, 'Confident')" title="Confident">😎</button>
+          <button class="emoji-btn" onclick="selectEmoji(this, 'Neutral')" title="Neutral">🙂</button>
+          <button class="emoji-btn" onclick="selectEmoji(this, 'Sad/Unsure')" title="Sad/Unsure">😢</button>
         </div>
       </div>
 
@@ -202,7 +206,7 @@
   <!-- DRIVE CAR TO DIAGNOSTIC -->
   <div class="card" style="text-align: center;">
     <h2>3. Drive to the Diagnostic Test!</h2>
-    <p>Apply an **Applied Force** to accelerate the car to the finish line. Crossing the line will automatically launch your Diagnostic Test!</p>
+    <p>Apply an <strong>Applied Force</strong> to accelerate the car to the finish line. Crossing the line will automatically launch your Diagnostic Test!</p>
     
     <div class="track-container" id="track">
       <div class="finish-line"></div>
@@ -218,27 +222,24 @@
 </div>
 
 <script>
-  // Emoji Selection Logic
   function selectEmoji(btn, feeling) {
     document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     localStorage.setItem('studentFeeling', feeling);
   }
 
-  // Confidence Slider Logic
   function updateConfidence(val) {
     document.getElementById('confidenceVal').innerText = val + '%';
     localStorage.setItem('studentConfidence', val);
   }
 
-  // Drive Car Interactive Game Logic
   let carPos = 10;
-  const finishLinePos = 780; // Approximate finish pixel mark
+  const finishLinePos = 780;
 
   function pushCar() {
     if (carPos >= finishLinePos) return;
 
-    carPos += 60; // Move car forward per click
+    carPos += 60;
     const carElem = document.getElementById('car');
     carElem.style.left = carPos + 'px';
 
@@ -246,7 +247,6 @@
       document.getElementById('gameStatus').innerText = "🏁 FINISH LINE CROSSED! Redirecting to Diagnostic Test...";
       document.getElementById('gasBtn').disabled = true;
       
-      // Auto-redirect to Diagnostic Test after 1.2 seconds
       setTimeout(() => {
         window.location.href = "https://stefanussetiawan1592-dev.github.io/forces/diagnostictest";
       }, 1200);
