@@ -22,7 +22,7 @@
       line-height: 1.6;
     }
     .container {
-      max-width: 950px;
+      max-width: 1100px;
       margin: 30px auto;
       padding: 0 20px;
     }
@@ -35,17 +35,37 @@
       margin-bottom: 25px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    header h1 { margin: 0; font-size: 2rem; }
+    header h1 { margin: 0; font-size: 2.1rem; }
     header p { margin-top: 8px; opacity: 0.9; }
 
-    .card {
+    /* TOP SECTION LAYOUT: 2/3 FORM + 1/3 CHATBOT */
+    .top-layout {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .reflection-card {
+      flex: 2;
+      min-width: 320px;
       background: var(--card-bg);
       padding: 25px;
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      margin-bottom: 25px;
     }
-    h2 { color: var(--primary); margin-top: 0; font-size: 1.4rem; }
+    .chatbot-card {
+      flex: 1;
+      min-width: 280px;
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      border-top: 4px solid var(--secondary);
+    }
+
+    h2 { color: var(--primary); margin-top: 0; font-size: 1.3rem; }
 
     .form-group {
       margin-bottom: 18px;
@@ -81,25 +101,79 @@
     .btn:hover { opacity: 0.9; }
     .btn:disabled { background: #ccc; cursor: not-allowed; }
 
-    /* GRID LAYOUT FOR PEER COMMENTS BOARD (2 COLUMNS) */
+    /* CHATBOT COMPONENTS */
+    .chat-box {
+      flex: 1;
+      min-height: 250px;
+      max-height: 320px;
+      overflow-y: auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+      background: #f8f9fa;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.88rem;
+    }
+    .msg {
+      padding: 8px 12px;
+      border-radius: 8px;
+      max-width: 85%;
+      word-wrap: break-word;
+    }
+    .msg.bot {
+      background: #eef7fc;
+      color: #1a5f7a;
+      align-self: flex-start;
+      border-left: 3px solid var(--secondary);
+    }
+    .msg.user {
+      background: var(--secondary);
+      color: white;
+      align-self: flex-end;
+    }
+    .chat-input-group {
+      display: flex;
+      gap: 8px;
+    }
+    .chat-input-group input {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 0.88rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .chat-input-group button {
+      padding: 8px 15px;
+      background: var(--secondary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* BOTTOM SECTION: PEER REFLECTION WALL (2 COLUMNS) */
     .comments-board {
-      margin-top: 30px;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
     .comments-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 18px;
       margin-top: 15px;
     }
     .comment-item {
       background: #f8f9fa;
       border-top: 4px solid var(--secondary);
-      padding: 15px;
+      padding: 16px;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
     }
     .comment-header {
       display: flex;
@@ -120,7 +194,7 @@
       margin: 6px 0 0 0;
       color: #444;
       font-size: 0.92rem;
-      white-space: pre-line; /* Preserves student line breaks */
+      white-space: pre-line;
     }
   </style>
 </head>
@@ -128,49 +202,72 @@
 
 <div class="container">
   <header>
-    <h1>🎓 Peer Reflection Board</h1>
-    <p>Share your learning insights and explore what your classmates have discovered!</p>
+    <h1>🎓 Peer Reflection Board & AI Assistant</h1>
+    <p>Consolidate your physics learning, ask AI for instant help, and read insights from peers!</p>
   </header>
 
-  <!-- REFLECTION FORM (SINGLE PROMPT) -->
-  <div class="card">
-    <h2>Post Your Reflection</h2>
-    <form id="reflectionForm">
-      <div class="form-group">
-        <label for="studentName">Your Full Name:</label>
-        <input type="text" id="studentName" placeholder="Enter your name..." required>
+  <!-- TOP SECTION: FORM (2/3) + CHATBOT (1/3) -->
+  <div class="top-layout">
+    
+    <!-- REFLECTION FORM (2/3 PORTSION) -->
+    <div class="reflection-card">
+      <h2>Post Your Reflection</h2>
+      <form id="reflectionForm">
+        <div class="form-group">
+          <label for="studentName">Your Full Name:</label>
+          <input type="text" id="studentName" placeholder="Enter your full name..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="qReflection">Reflect on your learning journey:</label>
+          <p style="margin-top: -4px; margin-bottom: 8px; font-size: 0.88rem; color: #666;">
+            <em>Do you fully understand Free Body Diagrams (FBD) and force types? What interesting questions or phenomena would you like to explore further?</em>
+          </p>
+          <textarea id="qReflection" rows="6" placeholder="Write your thoughts, masteries, or remaining questions here..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">Submit & Share Reflection</button>
+      </form>
+    </div>
+
+    <!-- AI CHATBOT ASSISTANT (1/3 PORTSION) -->
+    <div class="chatbot-card">
+      <h2>🤖 Physics AI Assistant</h2>
+      <p style="font-size: 0.82rem; color: #666; margin-top: -5px; margin-bottom: 10px;">
+        Need quick help with FBD or forces before posting? Ask Gemini AI below!
+      </p>
+      
+      <div class="chat-box" id="chatBox">
+        <div class="msg bot">Hello! I'm your Physics AI Assistant. Need help understanding Free Body Diagrams or Force vectors? Ask me anything!</div>
       </div>
 
-      <div class="form-group">
-        <label for="qReflection">Reflect on your learning journey:</label>
-        <p style="margin-top: -4px; margin-bottom: 8px; font-size: 0.9rem; color: #666;">
-          <em>Do you fully understand Free Body Diagrams (FBD) and force types? What interesting questions or phenomena would you like to explore further?</em>
-        </p>
-        <textarea id="qReflection" rows="5" placeholder="Write your reflection and thoughts here..." required></textarea>
+      <div class="chat-input-group">
+        <input type="text" id="chatInput" placeholder="Ask about FBD or forces..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendChatMessage()" id="chatSendBtn">Send</button>
       </div>
+    </div>
 
-      <button type="submit" class="btn" id="submitBtn">Submit & Share Reflection</button>
-    </form>
   </div>
 
-  <!-- PEER REFLECTIONS DISPLAY BOARD (2 COLUMNS GRID) -->
-  <div class="card comments-board">
+  <!-- BOTTOM SECTION: PEER REFLECTIONS WALL (2 COLUMNS GRID) -->
+  <div class="comments-board">
     <h2>💬 Peer Reflection Wall</h2>
-    <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Read reflections submitted by your peers below:</p>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Read reflections submitted by your classmates below:</p>
     
     <div id="reflectionGrid" class="comments-grid">
-      <p style="grid-column: 1 / -1; text-align: center; color: #777;"><em>Loading reflections...</em></p>
+      <p style="grid-column: 1 / -1; text-align: center; color: #777;"><em>Loading reflections from peers...</em></p>
     </div>
   </div>
 </div>
 
-<!-- FIREBASE LIBRARIES (SDK v8 Compatibility Mode) -->
+<!-- FIREBASE LIBRARIES (v8 SDK Compatibility Mode) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
   // ===================================================
-  // REPLACE THIS CONFIG WITH YOUR OWN FIREBASE KEYS!
+  // 1. FIREBASE CONFIGURATION
+  // Replace placeholders with your Firebase credentials!
   // ===================================================
   const firebaseConfig = {
     apiKey: "AIzaSyCwh7FpFASNRadgPiiYYWM4EJkw5jcQWPA",
@@ -182,17 +279,16 @@
     appId: "1:120073256923:web:f35bd731ecae6af730b1fe"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  // Pre-fill name if stored from earlier modules
+  // Pre-fill name if stored previously
   const savedName = localStorage.getItem('studentName');
   if (savedName) {
     document.getElementById('studentName').value = savedName;
   }
 
-  // Handle Form Submission
+  // Submit Reflection to Firebase
   document.getElementById('reflectionForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
@@ -204,17 +300,15 @@
     const reflection = document.getElementById('qReflection').value.trim();
     const timestamp = new Date().toLocaleString();
 
-    // Save student name locally
     localStorage.setItem('studentName', name);
 
-    // Push combined reflection object to Firebase
     db.ref('reflections').push({
       name: name,
       reflection: reflection,
       timestamp: timestamp
     }).then(() => {
-      alert("Reflection successfully posted!");
-      document.getElementById('qReflection').value = ""; // Clear textarea
+      alert("Reflection successfully posted to the Peer Wall!");
+      document.getElementById('qReflection').value = "";
       submitBtn.disabled = false;
       submitBtn.innerText = "Submit & Share Reflection";
     }).catch((error) => {
@@ -224,7 +318,7 @@
     });
   });
 
-  // Listen to Firebase and render comments live in 2-column Grid
+  // Listen to Firebase Realtime Database
   db.ref('reflections').on('value', (snapshot) => {
     const gridContainer = document.getElementById('reflectionGrid');
     gridContainer.innerHTML = "";
@@ -235,7 +329,6 @@
       return;
     }
 
-    // Convert object to array and reverse to show newest first
     const items = Object.values(data).reverse();
 
     items.forEach(item => {
@@ -252,7 +345,69 @@
     });
   });
 
-  // Helper function to prevent XSS injection
+  // ===================================================
+  // 2. GEMINI AI CHATBOT CONFIGURATION
+  // Replace with your Google AI Studio API key!
+  // ===================================================
+  const GEMINI_API_KEY = "AQ.Ab8RN6I3jK8KXpQr1CMUtCXpN-sxf2eOzdyC_YbxDftYYzLv8w";
+
+  function handleKeyPress(e) {
+    if (e.key === 'Enter') sendChatMessage();
+  }
+
+  async function sendChatMessage() {
+    const inputField = document.getElementById('chatInput');
+    const question = inputField.value.trim();
+    if (!question) return;
+
+    const chatBox = document.getElementById('chatBox');
+    
+    // Append User Message
+    chatBox.innerHTML += `<div class="msg user">${escapeHtml(question)}</div>`;
+    inputField.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Append Loading State
+    const loadingId = "loading_" + Date.now();
+    chatBox.innerHTML += `<div class="msg bot" id="${loadingId}"><em>Thinking...</em></div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+      const reply = await callGeminiAPI(question);
+      document.getElementById(loadingId).innerText = reply;
+    } catch (err) {
+      document.getElementById(loadingId).innerText = "Sorry, I couldn't process that. Please check your API key or network connection.";
+    }
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  async function callGeminiAPI(userQuery) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    
+    const promptSystem = `You are an encouraging and concise Physics Tutor Assistant for high school students. 
+Your goal is to answer student queries specifically about Forces and Free Body Diagrams (FBD). 
+Keep your explanations short (maximum 2-3 brief sentences), clear, and engaging. 
+Query: ${userQuery}`;
+
+    const payload = {
+      contents: [{
+        parts: [{ text: promptSystem }]
+      }]
+    };
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error("API Error");
+
+    const result = await response.json();
+    return result.candidates[0].content.parts[0].text;
+  }
+
+  // Helper XSS Prevention
   function escapeHtml(text) {
     if (!text) return "";
     return text
