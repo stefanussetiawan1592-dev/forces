@@ -267,7 +267,6 @@
 <script>
   // ===================================================
   // 1. FIREBASE CONFIGURATION
-  // Replace placeholders with your Firebase credentials!
   // ===================================================
   const firebaseConfig = {
     apiKey: "AIzaSyCwh7FpFASNRadgPiiYYWM4EJkw5jcQWPA",
@@ -346,11 +345,8 @@
   });
 
   // ===================================================
-  // 2. GEMINI AI CHATBOT CONFIGURATION
-  // Replace with your Google AI Studio API key!
+  // 2. GEMINI AI CHATBOT VIA VERCEL PROXY
   // ===================================================
-  const GEMINI_API_KEY = "AQ.Ab8RN6KrQzJeLrTvm0qM6k3h-gL--1qKfbLSY1IveXIbSYZjDQ";
-
   function handleKeyPress(e) {
     if (e.key === 'Enter') sendChatMessage();
   }
@@ -376,41 +372,30 @@
       const reply = await callGeminiAPI(question);
       document.getElementById(loadingId).innerText = reply;
     } catch (err) {
-      document.getElementById(loadingId).innerText = "Sorry, I couldn't process that. Please check your API key or network connection.";
+      document.getElementById(loadingId).innerText = "Sorry, I couldn't process that. Please check your connection.";
     }
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-async function callGeminiAPI(userQuery) {
-  // Menggunakan model gemini-1.5-flash yang stabil
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-  
-  const promptSystem = `You are an encouraging and concise Physics Tutor Assistant for high school students. 
-Your goal is to answer student queries specifically about Forces and Free Body Diagrams (FBD). 
-Keep your explanations short (maximum 2-3 brief sentences), clear, and engaging. 
-Query: ${userQuery}`;
+  async function callGeminiAPI(userQuery) {
+    // Memanggil API Proxy Vercel (Tanpa API Key terbuka di kode)
+    const proxyUrl = "https://physics-ai-proxy.vercel.app/api/chat";
 
-  const payload = {
-    contents: [{
-      parts: [{ text: promptSystem }]
-    }]
-  };
+    const response = await fetch(proxyUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userQuery })
+    });
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Vercel Proxy Error Detail:", errorData);
+      throw new Error(`Proxy Error: ${response.status}`);
+    }
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    console.error("Gemini API Error Detail:", errorData);
-    throw new Error(`API Error: ${response.status}`);
+    const data = await response.json();
+    return data.reply;
   }
-
-  const result = await response.json();
-  return result.candidates[0].content.parts[0].text;
-}
 
   // Helper XSS Prevention
   function escapeHtml(text) {
