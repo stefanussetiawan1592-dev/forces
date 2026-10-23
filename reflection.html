@@ -155,6 +155,41 @@
       cursor: pointer;
     }
 
+    /* HYBRID AI MODE CONFIG */
+    .api-key-config {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .api-key-row {
+      display: flex;
+      gap: 6px;
+    }
+    .api-key-row input {
+      flex: 1;
+      padding: 6px 8px;
+      font-size: 0.78rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .api-key-row button {
+      padding: 6px 10px;
+      background: #17a2b8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .api-key-note {
+      font-size: 0.73rem;
+      color: #666;
+      font-style: italic;
+      margin: 0;
+    }
+
     /* BOTTOM SECTION: PEER REFLECTION WALL (2 COLUMNS) */
     .comments-board {
       background: var(--card-bg);
@@ -196,6 +231,29 @@
       font-size: 0.92rem;
       white-space: pre-line;
     }
+
+    /* NAVIGATION BUTTON AT THE VERY BOTTOM */
+    .nav-bottom-container {
+      margin-top: 35px;
+      text-align: center;
+      padding-bottom: 20px;
+    }
+    .btn-next-page {
+      display: inline-block;
+      padding: 14px 28px;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-next-page:hover {
+      background: #13465a;
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -234,11 +292,20 @@
     <div class="chatbot-card">
       <h2>🤖 Physics AI Assistant</h2>
       <p style="font-size: 0.82rem; color: #666; margin-top: -5px; margin-bottom: 10px;">
-        Need quick help with FBD or forces before posting? Ask Gemini AI below!
+        Need quick help with FBD or forces before posting? Ask AI below!
       </p>
+
+      <!-- HYBRID CONFIG: SET API KEY -->
+      <div class="api-key-config">
+        <div class="api-key-row">
+          <input type="text" id="userApiKey" placeholder="Enter Gemini API Key..." />
+          <button onclick="saveApiKey()">SET API KEY</button>
+        </div>
+        <p class="api-key-note">Ask your teacher for API Key (optional for full AI features)</p>
+      </div>
       
       <div class="chat-box" id="chatBox">
-        <div class="msg bot">Hello! I'm your Physics AI Assistant. Need help understanding Free Body Diagrams or Force vectors? Ask me anything!</div>
+        <div class="msg bot">Hello! I'm your Physics AI Assistant. Ask me anything about Free Body Diagrams (FBD) or Force vectors!</div>
       </div>
 
       <div class="chat-input-group">
@@ -258,6 +325,14 @@
       <p style="grid-column: 1 / -1; text-align: center; color: #777;"><em>Loading reflections from peers...</em></p>
     </div>
   </div>
+
+  <!-- NAVIGATION BUTTON AT THE VERY BOTTOM (POSISI DI BAWAH KOLEKSI KOMENTAR) -->
+  <div class="nav-bottom-container">
+    <a href="https://stefanussetiawan1592-dev.github.io/forces/newton.html" class="btn-next-page">
+      Lanjut ke Materi Hukum Newton ➔
+    </a>
+  </div>
+
 </div>
 
 <!-- FIREBASE LIBRARIES (v8 SDK Compatibility Mode) -->
@@ -285,6 +360,23 @@
   const savedName = localStorage.getItem('studentName');
   if (savedName) {
     document.getElementById('studentName').value = savedName;
+  }
+
+  // Pre-fill API Key if saved
+  const savedApiKey = localStorage.getItem('customGeminiKey');
+  if (savedApiKey) {
+    document.getElementById('userApiKey').value = savedApiKey;
+  }
+
+  function saveApiKey() {
+    const key = document.getElementById('userApiKey').value.trim();
+    if (key) {
+      localStorage.setItem('customGeminiKey', key);
+      alert("API Key saved! Online Gemini AI mode activated.");
+    } else {
+      localStorage.removeItem('customGeminiKey');
+      alert("API Key cleared. Switching back to Local Keyword mode.");
+    }
   }
 
   // Submit Reflection to Firebase
@@ -345,7 +437,7 @@
   });
 
   // ===================================================
-  // 2. GEMINI AI CHATBOT VIA VERCEL PROXY
+  // 2. HYBRID AI CHATBOT (LOCAL KEYWORD + GEMINI DIRECT)
   // ===================================================
   function handleKeyPress(e) {
     if (e.key === 'Enter') sendChatMessage();
@@ -369,32 +461,66 @@
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-      const reply = await callGeminiAPI(question);
+      const reply = await callHybridAI(question);
       document.getElementById(loadingId).innerText = reply;
     } catch (err) {
-      document.getElementById(loadingId).innerText = "Sorry, I couldn't process that. Please check your connection.";
+      document.getElementById(loadingId).innerText = "Error: " + err.message;
     }
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  async function callGeminiAPI(userQuery) {
-    // Memanggil API Proxy Vercel (Tanpa API Key terbuka di kode)
-    const proxyUrl = "https://physics-ai-proxy.vercel.app/api/chat";
+  async function callHybridAI(userQuery) {
+    const apiKey = localStorage.getItem('customGeminiKey') || document.getElementById('userApiKey').value.trim();
 
-    const response = await fetch(proxyUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userQuery })
-    });
+    // MODE 1: Panggil Langsung Gemini API jika Siswa Memasukkan API Key dari Guru
+    if (apiKey) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      const promptSystem = `You are an encouraging and concise Physics Tutor Assistant for high school students. 
+Your goal is to answer student queries specifically about Forces and Free Body Diagrams (FBD). 
+Keep your explanations short (maximum 2-3 brief sentences), clear, and engaging. 
+Query: ${userQuery}`;
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Vercel Proxy Error Detail:", errorData);
-      throw new Error(`Proxy Error: ${response.status}`);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptSystem }] }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("API Key invalid or rate limited. Switch to local mode.");
+      }
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text;
+    } 
+
+    // MODE 2: Logika Keyword Lokal jika Tidak Ada API Key
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const query = userQuery.toLowerCase();
+
+    if (query.includes("fbd") || query.includes("free body") || query.includes("diagram gaya")) {
+      return "Diagram Gaya Bebas (FBD) menggambarkan semua gaya luar yang bekerja pada suatu benda. Pastikan menggambar anak panah gaya mulai dari titik pusat massa benda ya!";
+    } 
+    else if (query.includes("gaya berat") || query.includes("gravitasi") || query.includes(" w")) {
+      return "Gaya Berat (w) selalu mengarah tegak lurus ke bawah menuju pusat bumi, dirumuskan dengan w = m × g.";
+    } 
+    else if (query.includes("gaya normal") || query.includes(" n")) {
+      return "Gaya Normal (N) adalah gaya kontak yang arahnya selalu TEGAK LURUS terhadap bidang permukaan sentuh.";
+    } 
+    else if (query.includes("gesek") || query.includes("friksi") || query.includes("f_s") || query.includes("f_k")) {
+      return "Gaya Gesek bekerja berlawanan dengan arah kecenderungan gerak benda. Ada gaya gesek statis (benda diam) dan kinetis (benda bergerak).";
+    } 
+    else if (query.includes("tegangan tali") || query.includes(" t")) {
+      return "Gaya Tegangan Tali (T) bekerja sepanjang tali dan arahnya selalu menarik benda (menjauhi benda yang ditinjau).";
+    } 
+    else if (query.includes("halo") || query.includes("hai") || query.includes("pagi") || query.includes("siang")) {
+      return "Halo! Ada yang ingin kamu tanyakan mengenai jenis-jenis gaya atau cara menggambarkan Diagram Gaya Bebas (FBD)?";
+    } 
+    else {
+      return "Jawaban lokal: Masukkan API Key dari guru di bagian atas chatbox untuk pertanyaan umum, atau tanyakan spesifik kata kunci: 'Gaya Normal', 'Gaya Berat', 'Gaya Gesek', atau 'FBD'.";
     }
-
-    const data = await response.json();
-    return data.reply;
   }
 
   // Helper XSS Prevention
