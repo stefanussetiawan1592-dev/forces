@@ -104,14 +104,14 @@
     /* CHATBOT COMPONENTS */
     .chat-box {
       flex: 1;
-      min-height: 250px;
-      max-height: 320px;
+      min-height: 220px;
+      max-height: 280px;
       overflow-y: auto;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
       padding: 12px;
       background: #f8f9fa;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -134,6 +134,36 @@
       color: white;
       align-self: flex-end;
     }
+
+    /* CHAT PRESET BUTTONS */
+    .preset-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .chip-btn {
+      background: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .chip-btn:hover {
+      background: #cbd5e1;
+    }
+    .chip-btn.explore {
+      background: #17a2b8;
+      color: white;
+    }
+    .chip-btn.explore:hover {
+      background: #138496;
+    }
+
     .chat-input-group {
       display: flex;
       gap: 8px;
@@ -155,40 +185,32 @@
       cursor: pointer;
     }
 
-    /* HYBRID AI MODE CONFIG */
-    .api-key-config {
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+    /* POPUP MODAL STYLES FOR API KEY */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
     }
-    .api-key-row {
-      display: flex;
-      gap: 6px;
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      text-align: center;
     }
-    .api-key-row input {
-      flex: 1;
-      padding: 6px 8px;
-      font-size: 0.78rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .api-key-row button {
-      padding: 6px 10px;
-      background: #17a2b8;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .api-key-note {
-      font-size: 0.73rem;
-      color: #666;
-      font-style: italic;
-      margin: 0;
-    }
+    .modal-content h3 { margin-top: 0; color: var(--primary); }
+    .modal-content input { margin: 15px 0 5px 0; }
+    .modal-content .note { font-size: 0.8rem; color: #666; font-style: italic; margin-bottom: 15px; }
+    .modal-actions { display: flex; justify-content: center; gap: 10px; }
+    .btn-modal { padding: 8px 18px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+    .btn-save { background: var(--accent); color: white; }
+    .btn-close { background: #6c757d; color: white; }
 
     /* BOTTOM SECTION: PEER REFLECTION WALL (2 COLUMNS) */
     .comments-board {
@@ -267,7 +289,7 @@
   <!-- TOP SECTION: FORM (2/3) + CHATBOT (1/3) -->
   <div class="top-layout">
     
-    <!-- REFLECTION FORM (2/3 PORTSION) -->
+    <!-- REFLECTION FORM (2/3 PORTION) -->
     <div class="reflection-card">
       <h2>Post Your Reflection</h2>
       <form id="reflectionForm">
@@ -288,28 +310,31 @@
       </form>
     </div>
 
-    <!-- AI CHATBOT ASSISTANT (1/3 PORTSION) -->
+    <!-- AI CHATBOT ASSISTANT (1/3 PORTION) -->
     <div class="chatbot-card">
       <h2>🤖 Physics AI Assistant</h2>
       <p style="font-size: 0.82rem; color: #666; margin-top: -5px; margin-bottom: 10px;">
-        Need quick help with FBD or forces before posting? Ask AI below!
+        Click a quick topic or type your query below:
       </p>
 
-      <!-- HYBRID CONFIG: SET API KEY -->
-      <div class="api-key-config">
-        <div class="api-key-row">
-          <input type="text" id="userApiKey" placeholder="Enter Gemini API Key..." />
-          <button onclick="saveApiKey()">SET API KEY</button>
-        </div>
-        <p class="api-key-note">Ask your teacher for API Key (optional for full AI features)</p>
-      </div>
-      
       <div class="chat-box" id="chatBox">
-        <div class="msg bot">Hello! I'm your Physics AI Assistant. Ask me anything about Free Body Diagrams (FBD) or Force vectors!</div>
+        <div class="msg bot">Hello! Select a topic below or type a question to get instant explanations on forces and FBD!</div>
+      </div>
+
+      <!-- PRESET BUTTONS FOR QUICK LOCAL EXPLANATIONS -->
+      <div class="preset-buttons">
+        <button class="chip-btn" onclick="selectPreset('Free Body Diagram')">Free Body Diagram</button>
+        <button class="chip-btn" onclick="selectPreset('Upthrust')">Upthrust</button>
+        <button class="chip-btn" onclick="selectPreset('Friction')">Friction</button>
+        <button class="chip-btn" onclick="selectPreset('Drag')">Drag</button>
+        <button class="chip-btn" onclick="selectPreset('Normal')">Normal</button>
+        <button class="chip-btn" onclick="selectPreset('Weight')">Weight</button>
+        <button class="chip-btn" onclick="selectPreset('Tension')">Tension</button>
+        <button class="chip-btn explore" onclick="openApiKeyModal()">✨ Explore More</button>
       </div>
 
       <div class="chat-input-group">
-        <input type="text" id="chatInput" placeholder="Ask about FBD or forces..." onkeypress="handleKeyPress(event)">
+        <input type="text" id="chatInput" placeholder="Ask a question..." onkeypress="handleKeyPress(event)">
         <button onclick="sendChatMessage()" id="chatSendBtn">Send</button>
       </div>
     </div>
@@ -326,13 +351,27 @@
     </div>
   </div>
 
-  <!-- NAVIGATION BUTTON AT THE VERY BOTTOM (POSISI DI BAWAH KOLEKSI KOMENTAR) -->
+  <!-- NAVIGATION BUTTON AT THE VERY BOTTOM -->
   <div class="nav-bottom-container">
     <a href="https://stefanussetiawan1592-dev.github.io/forces/newton.html" class="btn-next-page">
       Lanjut ke Materi Hukum Newton ➔
     </a>
   </div>
 
+</div>
+
+<!-- POPUP MODAL FOR EXPLORE MORE API KEY -->
+<div class="modal-overlay" id="apiKeyModal">
+  <div class="modal-content">
+    <h3>✨ Unlock Gemini AI Mode</h3>
+    <p style="font-size: 0.88rem; color: #333; margin: 0;">Enter your Gemini API Key to enable open-ended chat exploration:</p>
+    <input type="text" id="modalApiKeyInput" placeholder="Paste API Key here..." />
+    <div class="note">Ask your teacher for API Key</div>
+    <div class="modal-actions">
+      <button class="btn-modal btn-save" onclick="saveApiKeyModal()">Save & Enable</button>
+      <button class="btn-modal btn-close" onclick="closeApiKeyModal()">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- FIREBASE LIBRARIES (v8 SDK Compatibility Mode) -->
@@ -360,23 +399,6 @@
   const savedName = localStorage.getItem('studentName');
   if (savedName) {
     document.getElementById('studentName').value = savedName;
-  }
-
-  // Pre-fill API Key if saved
-  const savedApiKey = localStorage.getItem('customGeminiKey');
-  if (savedApiKey) {
-    document.getElementById('userApiKey').value = savedApiKey;
-  }
-
-  function saveApiKey() {
-    const key = document.getElementById('userApiKey').value.trim();
-    if (key) {
-      localStorage.setItem('customGeminiKey', key);
-      alert("API Key saved! Online Gemini AI mode activated.");
-    } else {
-      localStorage.removeItem('customGeminiKey');
-      alert("API Key cleared. Switching back to Local Keyword mode.");
-    }
   }
 
   // Submit Reflection to Firebase
@@ -437,8 +459,38 @@
   });
 
   // ===================================================
-  // 2. HYBRID AI CHATBOT (LOCAL KEYWORD + GEMINI DIRECT)
+  // 2. MODAL API KEY LOGIC
   // ===================================================
+  function openApiKeyModal() {
+    const existingKey = localStorage.getItem('customGeminiKey') || "";
+    document.getElementById('modalApiKeyInput').value = existingKey;
+    document.getElementById('apiKeyModal').style.display = 'flex';
+  }
+
+  function closeApiKeyModal() {
+    document.getElementById('apiKeyModal').style.display = 'none';
+  }
+
+  function saveApiKeyModal() {
+    const key = document.getElementById('modalApiKeyInput').value.trim();
+    if (key) {
+      localStorage.setItem('customGeminiKey', key);
+      alert("API Key saved! Gemini AI exploration mode is now ACTIVE.");
+    } else {
+      localStorage.removeItem('customGeminiKey');
+      alert("API Key cleared. Switched back to Preset Local mode.");
+    }
+    closeApiKeyModal();
+  }
+
+  // ===================================================
+  // 3. CHATBOT LOGIC (ENGLISH RESPONSES)
+  // ===================================================
+  function selectPreset(topic) {
+    document.getElementById('chatInput').value = topic;
+    sendChatMessage();
+  }
+
   function handleKeyPress(e) {
     if (e.key === 'Enter') sendChatMessage();
   }
@@ -461,7 +513,7 @@
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-      const reply = await callHybridAI(question);
+      const reply = await getAIResponse(question);
       document.getElementById(loadingId).innerText = reply;
     } catch (err) {
       document.getElementById(loadingId).innerText = "Error: " + err.message;
@@ -469,15 +521,15 @@
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  async function callHybridAI(userQuery) {
-    const apiKey = localStorage.getItem('customGeminiKey') || document.getElementById('userApiKey').value.trim();
+  async function getAIResponse(userQuery) {
+    const apiKey = localStorage.getItem('customGeminiKey');
 
-    // MODE 1: Panggil Langsung Gemini API jika Siswa Memasukkan API Key dari Guru
+    // IF API KEY IS PRESENT: Panggil Gemini API Langsung
     if (apiKey) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-      const promptSystem = `You are an encouraging and concise Physics Tutor Assistant for high school students. 
-Your goal is to answer student queries specifically about Forces and Free Body Diagrams (FBD). 
-Keep your explanations short (maximum 2-3 brief sentences), clear, and engaging. 
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const promptSystem = `You are a helpful and concise Physics Assistant for high school students. 
+Answer all user questions specifically about Forces and Free Body Diagrams (FBD) in ENGLISH. 
+Keep your explanations short (2-3 clear sentences maximum), encouraging, and easy to understand. 
 Query: ${userQuery}`;
 
       const response = await fetch(url, {
@@ -489,37 +541,40 @@ Query: ${userQuery}`;
       });
 
       if (!response.ok) {
-        throw new Error("API Key invalid or rate limited. Switch to local mode.");
+        throw new Error("Invalid API Key or connection issue. Please re-enter API Key via 'Explore More'.");
       }
 
       const data = await response.json();
       return data.candidates[0].content.parts[0].text;
-    } 
+    }
 
-    // MODE 2: Logika Keyword Lokal jika Tidak Ada API Key
-    await new Promise(resolve => setTimeout(resolve, 400));
+    // IF NO API KEY: Local Preset Responses (ENGLISH)
+    await new Promise(resolve => setTimeout(resolve, 300));
     const query = userQuery.toLowerCase();
 
-    if (query.includes("fbd") || query.includes("free body") || query.includes("diagram gaya")) {
-      return "Diagram Gaya Bebas (FBD) menggambarkan semua gaya luar yang bekerja pada suatu benda. Pastikan menggambar anak panah gaya mulai dari titik pusat massa benda ya!";
+    if (query.includes("free body") || query.includes("fbd") || query.includes("diagram")) {
+      return "A Free Body Diagram (FBD) is a graphical illustration used to visualize the applied forces, moments, and resulting reactions acting on a body in a given condition. Always draw force vectors originating from the object's center of mass!";
     } 
-    else if (query.includes("gaya berat") || query.includes("gravitasi") || query.includes(" w")) {
-      return "Gaya Berat (w) selalu mengarah tegak lurus ke bawah menuju pusat bumi, dirumuskan dengan w = m × g.";
+    else if (query.includes("upthrust") || query.includes("buoyancy") || query.includes("buoyant")) {
+      return "Upthrust (or buoyant force) is an upward force exerted by a fluid that opposes the weight of a partially or fully immersed object. It depends on the fluid's density and displaced volume.";
     } 
-    else if (query.includes("gaya normal") || query.includes(" n")) {
-      return "Gaya Normal (N) adalah gaya kontak yang arahnya selalu TEGAK LURUS terhadap bidang permukaan sentuh.";
+    else if (query.includes("friction")) {
+      return "Friction is a resistive force acting parallel to the interface that opposes relative sliding motion between two surfaces in contact. It includes static friction (before movement) and kinetic friction (during movement).";
     } 
-    else if (query.includes("gesek") || query.includes("friksi") || query.includes("f_s") || query.includes("f_k")) {
-      return "Gaya Gesek bekerja berlawanan dengan arah kecenderungan gerak benda. Ada gaya gesek statis (benda diam) dan kinetis (benda bergerak).";
+    else if (query.includes("drag") || query.includes("air resistance")) {
+      return "Drag is a mechanical force generated by a solid object moving through a fluid (liquid or gas). It always acts in the direction opposite to the object's motion and increases with speed.";
     } 
-    else if (query.includes("tegangan tali") || query.includes(" t")) {
-      return "Gaya Tegangan Tali (T) bekerja sepanjang tali dan arahnya selalu menarik benda (menjauhi benda yang ditinjau).";
+    else if (query.includes("normal")) {
+      return "Normal Force (N) is the support force exerted upon an object that is in contact with another stable object. It always acts perpendicular (at 90 degrees) to the contact surface.";
     } 
-    else if (query.includes("halo") || query.includes("hai") || query.includes("pagi") || query.includes("siang")) {
-      return "Halo! Ada yang ingin kamu tanyakan mengenai jenis-jenis gaya atau cara menggambarkan Diagram Gaya Bebas (FBD)?";
+    else if (query.includes("weight") || query.includes("gravity")) {
+      return "Weight (W) is the gravitational force exerted on an object by the Earth (or another astronomical body). It always points vertically downwards toward the center of the Earth (W = mg).";
+    } 
+    else if (query.includes("tension")) {
+      return "Tension (T) is the pulling force transmitted axially through a string, rope, cable, or wire when pulled by forces acting from opposite ends. It always pulls away from the object being analyzed.";
     } 
     else {
-      return "Jawaban lokal: Masukkan API Key dari guru di bagian atas chatbox untuk pertanyaan umum, atau tanyakan spesifik kata kunci: 'Gaya Normal', 'Gaya Berat', 'Gaya Gesek', atau 'FBD'.";
+      return "Select one of the preset topics above, or click '✨ Explore More' to enter an API key for open-ended questions!";
     }
   }
 
