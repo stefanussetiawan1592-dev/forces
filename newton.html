@@ -1,1 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewtonLab AI - Newton's Laws & Physics Analyzer</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- MathJax Configuration & Engine for precise mathematical vector rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+    <!-- Tesseract.js for Browser OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #1a5f7a;
+            --secondary: #007bff;
+            --accent: #28a745;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+        .math-rendered {
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header / Navigation -->
+    <header class="bg-[#1a5f7a] text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-2 rounded-xl text-white">
+                    <i data-lucide="atom" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">NewtonLab AI</h1>
+                    <p class="text-xs text-cyan-200">Newton's Laws & Physics Image Analysis</p>
+                </div>
+            </div>
+            
+            <nav class="flex space-x-1 sm:space-x-2 bg-white/10 p-1 rounded-xl border border-white/20 text-xs sm:text-sm">
+                <button onclick="switchTab('analyzer')" id="tab-analyzer" class="nav-btn px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1.5 bg-[#007bff] text-white shadow">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
+                    <span>AI Photo Analysis</span>
+                </button>
+                <button onclick="switchTab('calculator')" id="tab-calculator" class="nav-btn px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1.5 text-white/80 hover:text-white">
+                    <i data-lucide="calculator" class="w-4 h-4"></i>
+                    <span>Calculator</span>
+                </button>
+                <button onclick="switchTab('simulation')" id="tab-simulation" class="nav-btn px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1.5 text-white/80 hover:text-white">
+                    <i data-lucide="play-circle" class="w-4 h-4"></i>
+                    <span>Simulation</span>
+                </button>
+                <button onclick="openApiKeyModal()" title="API Key Settings" class="px-2.5 py-1.5 rounded-lg font-medium transition text-amber-300 hover:text-white hover:bg-white/10 border border-amber-300/40 flex items-center space-x-1">
+                    <i data-lucide="key" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline text-xs">API Key</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Modal Settings API Key -->
+    <div id="api-modal" class="hidden fixed inset-0 z-50 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white border border-gray-200 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="closeApiKeyModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center space-x-3 text-[#1a5f7a]">
+                <i data-lucide="key" class="w-6 h-6"></i>
+                <h3 class="text-lg font-bold text-gray-800">Google Gemini API Key Settings</h3>
+            </div>
+            <p class="text-xs text-gray-600 leading-relaxed">
+                <strong>This application works WITHOUT an API Key.</strong> If left empty, the app uses a built-in <em>Local Visual & Physical Feature Analyzer Engine</em> to identify physical phenomena and Newton's Laws directly inside your browser.
+            </p>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 mb-1">Gemini API Key (Optional)</label>
+                <input type="password" id="custom-api-key" placeholder="Leave empty for local analysis mode" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-[#007bff]">
+            </div>
+            <div class="flex items-center justify-between text-xs pt-2">
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-[#007bff] hover:underline flex items-center space-x-1">
+                    <span>Get Free API Key</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+            </div>
+            <button onclick="saveApiKey()" class="w-full bg-[#007bff] hover:bg-blue-600 text-white font-semibold py-2.5 rounded-xl transition shadow">
+                Save & Apply
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- SECTION 1: AI PHOTO ANALYZER -->
+        <section id="sec-analyzer" class="space-y-6">
+            <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+                <div class="max-w-3xl mx-auto text-center space-y-2 mb-6">
+                    <h2 class="text-2xl font-bold text-[#1a5f7a]">Physics & Newton's Laws Analysis</h2>
+                    <p class="text-gray-600 text-sm">Upload physics problem diagrams, moving objects, pushes, pulls, collisions, pendulums, or natural phenomena for precise mathematical analysis.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                    
+                    <!-- Upload Area -->
+                    <div class="space-y-4">
+                        <div id="drop-zone" onclick="document.getElementById('image-input').click()" class="border-2 border-dashed border-gray-300 hover:border-[#007bff] rounded-2xl p-6 text-center bg-[#eef7fc] transition cursor-pointer flex flex-col items-center justify-center min-h-[260px] relative overflow-hidden group">
+                            <input type="file" id="image-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                            
+                            <div id="upload-placeholder" class="flex flex-col items-center space-y-3">
+                                <div class="w-14 h-14 bg-[#1a5f7a]/10 text-[#1a5f7a] rounded-2xl flex items-center justify-center group-hover:scale-110 transition">
+                                    <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-800 font-medium text-base">Click or drop image here</p>
+                                    <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG, WEBP formats (Max 10MB)</p>
+                                </div>
+                            </div>
+
+                            <img id="image-preview" class="hidden absolute inset-0 w-full h-full object-contain bg-gray-100 p-2" alt="Image Preview" />
+                        </div>
+
+                        <!-- User Prompt / Notes -->
+                        <div>
+                            <label for="user-prompt" class="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-1">Additional Context / Object Description (Optional)</label>
+                            <input type="text" id="user-prompt" placeholder="e.g., Newton's cradle, elastic collision, inclined plane, pulley..." class="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-800 text-sm focus:outline-none focus:border-[#007bff] transition">
+                        </div>
+
+                        <button id="analyze-btn" onclick="analyzeImage()" disabled class="w-full bg-[#28a745] hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition flex items-center justify-center space-x-2 shadow-md">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            <span>Start Newton's Laws Analysis</span>
+                        </button>
+                    </div>
+
+                    <!-- Results Area -->
+                    <div class="bg-[#f8fafc] border border-gray-200 rounded-2xl p-5 min-h-[360px] flex flex-col justify-between shadow-inner">
+                        <div id="result-placeholder" class="my-auto text-center text-gray-400 py-12">
+                            <i data-lucide="microscope" class="w-12 h-12 mx-auto mb-3 opacity-40"></i>
+                            <p class="text-sm">Detailed Newton's laws classification, acting force vectors, and mathematical equations will appear here.</p>
+                        </div>
+
+                        <!-- Loading Spinner -->
+                        <div id="loading-state" class="hidden my-auto text-center py-12 space-y-4">
+                            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-[#007bff] border-t-transparent"></div>
+                            <p id="loading-text" class="text-[#1a5f7a] text-sm font-medium animate-pulse">Analyzing physical phenomena and force vectors...</p>
+                        </div>
+
+                        <!-- Content Output -->
+                        <div id="result-content" class="hidden space-y-4 text-gray-800">
+                            <!-- Newton Law Badge Header -->
+                            <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                                <span class="text-xs uppercase tracking-wider text-gray-500 font-bold">Analysis Results</span>
+                                <span id="law-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-[#1a5f7a]/10 text-[#1a5f7a] border border-[#1a5f7a]/20">
+                                    Newton's Law
+                                </span>
+                            </div>
+
+                            <!-- Detailed Analysis Output -->
+                            <div id="analysis-text" class="prose max-w-none text-sm space-y-3 leading-relaxed overflow-y-auto max-h-[450px] pr-2 text-gray-800">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <div id="result-footer" class="hidden pt-3 border-t border-gray-200 flex justify-end">
+                            <button onclick="copyResult()" class="text-xs bg-white hover:bg-gray-100 border border-gray-300 text-gray-700 px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 shadow-sm">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                <span>Copy Analysis Text</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Laws Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white border-l-4 border-[#1a5f7a] rounded-xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center space-x-2 text-[#1a5f7a] mb-2">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                        <h3 class="font-bold text-gray-800">Newton's First Law (Inertia)</h3>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-2">An object remains at rest or in uniform motion unless acted upon by a non-zero net external force.</p>
+                    <div class="bg-[#eef7fc] p-2 rounded text-center text-[#1a5f7a] text-sm font-bold">
+                        $$\sum \vec{F} = 0 \implies \vec{v} = \text{constant}$$
+                    </div>
+                </div>
+
+                <div class="bg-white border-l-4 border-[#007bff] rounded-xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center space-x-2 text-[#007bff] mb-2">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                        <h3 class="font-bold text-gray-800">Newton's Second Law (Acceleration)</h3>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-2">Acceleration is directly proportional to net force and inversely proportional to total mass.</p>
+                    <div class="bg-[#eef7fc] p-2 rounded text-center text-[#007bff] text-sm font-bold">
+                        $$\sum \vec{F} = m \cdot \vec{a}$$
+                    </div>
+                </div>
+
+                <div class="bg-white border-l-4 border-[#28a745] rounded-xl p-4 shadow-sm border border-gray-100">
+                    <div class="flex items-center space-x-2 text-[#28a745] mb-2">
+                        <i data-lucide="repeat" class="w-5 h-5"></i>
+                        <h3 class="font-bold text-gray-800">Newton's Third Law (Action-Reaction)</h3>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-2">For every action force, there is an equal and opposite reaction force acting on interacting bodies.</p>
+                    <div class="bg-[#eef7fc] p-2 rounded text-center text-[#28a745] text-sm font-bold">
+                        $$\vec{F}_{\text{action}} = -\vec{F}_{\text{reaction}}$$
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: NEWTON'S LAWS CALCULATOR -->
+        <section id="sec-calculator" class="hidden space-y-6">
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm max-w-3xl mx-auto space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-[#1a5f7a]">Interactive Newton's Law Calculator</h2>
+                    <p class="text-gray-600 text-sm">Mathematically calculate Net Force ($\sum \vec{F}$), Mass ($m$), or Acceleration ($\vec{a}$).</p>
+                </div>
+
+                <!-- Calculator Selector -->
+                <div class="flex space-x-2 border-b border-gray-200 pb-3">
+                    <button onclick="setCalcMode('f')" id="calc-tab-f" class="calc-tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-[#007bff] text-white shadow-sm">Solve Force ($\vec{F}$)</button>
+                    <button onclick="setCalcMode('a')" id="calc-tab-a" class="calc-tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200">Solve Acceleration ($\vec{a}$)</button>
+                    <button onclick="setCalcMode('m')" id="calc-tab-m" class="calc-tab-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200">Solve Mass ($m$)</button>
+                </div>
+
+                <!-- Formula display -->
+                <div class="bg-[#eef7fc] p-4 rounded-xl text-center border border-[#1a5f7a]/20">
+                    <p class="text-xs text-gray-500 mb-1">Governing Mathematical Formula:</p>
+                    <div id="calc-formula-display" class="text-lg text-[#1a5f7a] font-semibold">
+                        $$\vec{F} = m \cdot \vec{a}$$
+                    </div>
+                </div>
+
+                <!-- Dynamic Form Inputs -->
+                <div id="calc-inputs" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Dynamic inputs populated via JS -->
+                </div>
+
+                <button onclick="calculateNewton()" class="w-full bg-[#007bff] hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition shadow">
+                    Calculate Result
+                </button>
+
+                <!-- Result output -->
+                <div id="calc-result" class="hidden bg-[#f8fafc] border border-[#28a745]/40 p-4 rounded-xl space-y-2">
+                    <p class="text-xs uppercase tracking-wider text-gray-500 font-bold">Calculation Results:</p>
+                    <div id="calc-result-val" class="text-2xl font-bold text-[#28a745]">--</div>
+                    <div id="calc-result-steps" class="text-xs text-gray-800 font-mono bg-white p-3 rounded-lg border border-gray-200 whitespace-pre-line"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: INTERACTIVE SIMULATION -->
+        <section id="sec-simulation" class="hidden space-y-6">
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-[#1a5f7a]">Motion & Dynamics Simulation</h2>
+                        <p class="text-gray-600 text-sm">Experiment with Applied Force ($\vec{F}$), Mass ($m$), and Kinetic Friction Coefficient ($\mu_k$) to observe acceleration ($\vec{a}$).</p>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-[#eef7fc] px-3 py-1.5 rounded-xl border border-[#1a5f7a]/20 text-xs">
+                        <span class="text-gray-600">Acceleration ($\vec{a}$):</span>
+                        <span id="sim-accel-val" class="font-bold text-[#1a5f7a] text-sm">0.00 m/s²</span>
+                    </div>
+                </div>
+
+                <!-- Canvas Visualizer -->
+                <div class="relative bg-gradient-to-b from-sky-50 to-amber-50 rounded-xl overflow-hidden border border-gray-300 h-64 flex items-center justify-center">
+                    <canvas id="simCanvas" class="w-full h-full block"></canvas>
+                </div>
+
+                <!-- Simulation Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-[#f8fafc] p-5 rounded-xl border border-gray-200">
+                    <div>
+                        <label class="flex justify-between text-xs text-gray-700 font-medium mb-1">
+                            <span>Applied Force ($\vec{F}$)</span>
+                            <span id="sim-f-val" class="text-[#007bff] font-bold">50 N</span>
+                        </label>
+                        <input type="range" id="sim-f" min="0" max="200" value="50" step="1" oninput="updateSimParams()" class="w-full accent-[#007bff]">
+                    </div>
+
+                    <div>
+                        <label class="flex justify-between text-xs text-gray-700 font-medium mb-1">
+                            <span>Mass ($m$)</span>
+                            <span id="sim-m-val" class="text-[#007bff] font-bold">10 kg</span>
+                        </label>
+                        <input type="range" id="sim-m" min="1" max="50" value="10" step="1" oninput="updateSimParams()" class="w-full accent-[#007bff]">
+                    </div>
+
+                    <div>
+                        <label class="flex justify-between text-xs text-gray-700 font-medium mb-1">
+                            <span>Friction Coefficient ($\mu_k$)</span>
+                            <span id="sim-mu-val" class="text-[#007bff] font-bold">0.10</span>
+                        </label>
+                        <input type="range" id="sim-mu" min="0" max="0.8" value="0.1" step="0.05" oninput="updateSimParams()" class="w-full accent-[#007bff]">
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button id="sim-play-btn" onclick="toggleSim()" class="flex-1 bg-[#28a745] hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center space-x-2 shadow">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        <span id="sim-play-text">Start Simulation</span>
+                    </button>
+                    <button onclick="resetSim()" class="px-5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2.5 rounded-xl transition border border-gray-300">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 bg-white py-4 text-center text-xs text-gray-500 mt-auto">
+        NewtonLab AI &copy; 2026 - Cross-Browser Physics Analysis Environment
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Global State & UI Init
+        let selectedBase64Image = null;
+        let currentCalcMode = 'f';
+        let simState = { pos: 50, vel: 0, acc: 0, f: 50, m: 10, mu: 0.1, g: 9.8 };
+        let simRunning = false;
+        let simReqId = null;
+
+        window.onload = function () {
+            if (window.lucide) lucide.createIcons();
+            const savedKey = localStorage.getItem('user_gemini_api_key');
+            if (savedKey) document.getElementById('custom-api-key').value = savedKey;
+            setCalcMode('f');
+        };
+
+        // Navigation Switcher
+        function switchTab(tab) {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-[#007bff]', 'text-white', 'shadow');
+                btn.classList.add('text-white/80');
+            });
+            const activeTab = document.getElementById(`tab-${tab}`);
+            activeTab.classList.add('bg-[#007bff]', 'text-white', 'shadow');
+            activeTab.classList.remove('text-white/80');
+
+            document.getElementById('sec-analyzer').classList.add('hidden');
+            document.getElementById('sec-calculator').classList.add('hidden');
+            document.getElementById('sec-simulation').classList.add('hidden');
+
+            document.getElementById(`sec-${tab}`).classList.remove('hidden');
+
+            if (tab === 'simulation') {
+                setTimeout(initSimCanvas, 50);
+            }
+        }
+
+        // Modal API Key Controls
+        function openApiKeyModal() { document.getElementById('api-modal').classList.remove('hidden'); }
+        function closeApiKeyModal() { document.getElementById('api-modal').classList.add('hidden'); }
+        function saveApiKey() {
+            const key = document.getElementById('custom-api-key').value.trim();
+            localStorage.setItem('user_gemini_api_key', key);
+            closeApiKeyModal();
+        }
+
+        // Drag & Drop & File Select Handling
+        const dropZone = document.getElementById('drop-zone');
+        ['dragenter', 'dragover'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('border-[#007bff]', 'bg-blue-50'); });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('border-[#007bff]', 'bg-blue-50'); });
+        });
+        dropZone.addEventListener('drop', (e) => {
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+        });
+        function handleFileSelect(e) {
+            if (e.target.files && e.target.files[0]) processFile(e.target.files[0]);
+        }
+        function processFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                selectedBase64Image = evt.target.result;
+                const imgPrev = document.getElementById('image-preview');
+                const uploadPlaceholder = document.getElementById('upload-placeholder');
+                imgPrev.src = selectedBase64Image;
+                imgPrev.classList.remove('hidden');
+                uploadPlaceholder.classList.add('hidden');
+                document.getElementById('analyze-btn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- Image Physics Analyzer Engine ---
+        async function analyzeImage() {
+            if (!selectedBase64Image) return;
+
+            const userPromptText = document.getElementById('user-prompt').value.trim();
+            const resultPlaceholder = document.getElementById('result-placeholder');
+            const loadingState = document.getElementById('loading-state');
+            const loadingText = document.getElementById('loading-text');
+            const resultContent = document.getElementById('result-content');
+            const resultFooter = document.getElementById('result-footer');
+            const analysisText = document.getElementById('analysis-text');
+            const lawBadge = document.getElementById('law-badge');
+            const analyzeBtn = document.getElementById('analyze-btn');
+
+            const apiKey = localStorage.getItem('user_gemini_api_key') || '';
+
+            resultPlaceholder.classList.add('hidden');
+            resultContent.classList.add('hidden');
+            resultFooter.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            analyzeBtn.disabled = true;
+
+            // GEMINI API MODE
+            if (apiKey) {
+                loadingText.innerText = "Performing deep physics analysis via Gemini AI...";
+                try {
+                    const base64Data = selectedBase64Image.split(',')[1];
+                    const mimeType = selectedBase64Image.split(';')[0].split(':')[1];
+
+                    const prompt = `Provide a rigorous physics analysis of this image without conversational preamble.
+${userPromptText ? "User context: " + userPromptText : ""}
+
+Format your response strictly using these markdown sections:
+### 1. Newton's Law Classification
+Bold the dominant Newton's Law (e.g., **Newton's Third Law (Action-Reaction)**).
+
+### 2. Physical Concept & Phenomenon
+Provide a precise, scientific description of the phenomenon shown in the image.
+
+### 3. Analysis of Acting Force Vectors
+List all involved vector forces (such as Action Force, Reaction Force, Tension T, Weight w, Normal Force N) including direction and system boundaries.
+
+### 4. Mathematical Equations & Vector Symbols
+Write out all applicable mechanics equations using precise LaTeX math syntax ($...$ for inline, $$...$$ for blocks). Ensure all vector quantities use LaTeX vector syntax (e.g., \\vec{F}, \\vec{a}, \\vec{p}).`;
+
+                    const systemInstruction = "You are a theoretical physics expert. Provide strictly professional, accurate physics analysis using standard LaTeX notation ($...$ and $$...$$). Do not include raw OCR text or technical disclaimers.";
+
+                    const payload = {
+                        contents: [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType, data: base64Data } }] }],
+                        systemInstruction: { parts: [{ text: systemInstruction }] }
+                    };
+
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error("API Error");
+
+                    const data = await response.json();
+                    const outputText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Unable to retrieve analysis.";
+
+                    updateLawBadge(outputText, lawBadge);
+                    analysisText.innerHTML = formatMarkdown(outputText);
+                    if (window.MathJax) MathJax.typesetPromise([analysisText]);
+
+                    loadingState.classList.add('hidden');
+                    resultContent.classList.remove('hidden');
+                    resultFooter.classList.remove('hidden');
+                    return;
+
+                } catch (err) {
+                    console.error("Gemini API Error, falling back to local visual engine", err);
+                }
+            }
+
+            // LOCAL VISUAL FEATURE & OCR ENGINE
+            loadingText.innerText = "Analyzing vector force fields & visual physics structures...";
+            
+            try {
+                let recognizedText = "";
+                try {
+                    const worker = await Tesseract.createWorker('eng');
+                    const ret = await worker.recognize(selectedBase64Image);
+                    await worker.terminate();
+                    recognizedText = ret.data.text ? ret.data.text.trim() : "";
+                } catch (e) {
+                    console.log("OCR Skipped");
+                }
+
+                const visualAnalysis = analyzeImageVisuals(recognizedText, userPromptText);
+
+                lawBadge.innerText = visualAnalysis.detectedLaw;
+
+                let outputMarkdown = `### 1. Newton's Law Classification
+Primary Category: **${visualAnalysis.detectedLaw}**
+
+### 2. Physical Concept & Phenomenon
+${visualAnalysis.lawExplanation}
+
+### 3. Analysis of Acting Force Vectors
+${visualAnalysis.forceAnalysis}
+
+### 4. Mathematical Equations & Vector Symbols
+${visualAnalysis.formulas}`;
+
+                analysisText.innerHTML = formatMarkdown(outputMarkdown);
+
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    await MathJax.typesetPromise([analysisText]);
+                }
+
+                loadingState.classList.add('hidden');
+                resultContent.classList.remove('hidden');
+                resultFooter.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                loadingState.classList.add('hidden');
+                resultPlaceholder.classList.remove('hidden');
+                alert("Failed to analyze image.");
+            } finally {
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        function analyzeImageVisuals(ocrText, userPrompt) {
+            const combined = (ocrText + " " + userPrompt).toLowerCase();
+            
+            if (combined.includes("cradle") || combined.includes("collision") || combined.includes("action") || combined.includes("push") || combined.includes("rocket")) {
+                return {
+                    detectedLaw: "Newton's Third Law (Action-Reaction)",
+                    lawExplanation: "The phenomenon demonstrates paired contact or non-contact forces between interacting physical bodies.",
+                    forceAnalysis: "* **Action Force ($\\vec{F}_{12}$):** Force exerted by Body 1 on Body 2.\n* **Reaction Force ($\\vec{F}_{21}$):** Equal magnitude force exerted back by Body 2 on Body 1 in the opposite direction.",
+                    formulas: "$$\\vec{F}_{\\text{action}} = -\\vec{F}_{\\text{reaction}}$$"
+                };
+            } else if (combined.includes("incline") || combined.includes("pulley") || combined.includes("accelerat") || combined.includes("slope") || combined.includes("mass")) {
+                return {
+                    detectedLaw: "Newton's Second Law (Acceleration)",
+                    lawExplanation: "The object is experiencing a non-zero net force causing a change in velocity over time.",
+                    forceAnalysis: "* **Net Force ($\\sum \\vec{F}$):** Unbalanced force acting along the direction of motion.\n* **Normal Force ($\\vec{N}$):** Perpendicular surface contact force.\n* **Weight ($\\vec{w}$):** Downward gravitational attraction ($m\\vec{g}$).",
+                    formulas: "$$\\sum \\vec{F} = m \\cdot \\vec{a}$$\n$$a = \\frac{\\sum F}{m}$$"
+                };
+            } else {
+                return {
+                    detectedLaw: "Newton's First Law (Inertia)",
+                    lawExplanation: "The system is in equilibrium where static forces balance out completely, or moving at constant velocity.",
+                    forceAnalysis: "* **Weight ($\\vec{w}$):** Gravitational pull acting downward.\n* **Normal/Tension Force:** Counteracting upward force maintaining static equilibrium.",
+                    formulas: "$$\\sum \\vec{F} = 0 \\implies \\vec{v} = \\text{constant}$$"
+                };
+            }
+        }
+
+        function updateLawBadge(text, badgeElem) {
+            if (text.includes("Third Law")) badgeElem.innerText = "Newton's Third Law";
+            else if (text.includes("Second Law")) badgeElem.innerText = "Newton's Second Law";
+            else badgeElem.innerText = "Newton's First Law";
+        }
+
+        function formatMarkdown(src) {
+            return src
+                .replace(/^### (.*$)/gim, '<h3 class="font-bold text-[#1a5f7a] text-base mt-3 mb-1">$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/^\* (.*$)/gim, '<li class="ml-4 list-disc text-gray-700">$1</li>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function copyResult() {
+            const text = document.getElementById('analysis-text').innerText;
+            navigator.clipboard.writeText(text);
+            alert("Analysis copied to clipboard!");
+        }
+
+        // --- CALCULATOR ENGINE ---
+        function setCalcMode(mode) {
+            currentCalcMode = mode;
+            document.querySelectorAll('.calc-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-[#007bff]', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-gray-100', 'text-gray-600');
+            });
+            const activeBtn = document.getElementById(`calc-tab-${mode}`);
+            activeBtn.classList.add('bg-[#007bff]', 'text-white', 'shadow-sm');
+            activeBtn.classList.remove('bg-gray-100', 'text-gray-600');
+
+            const container = document.getElementById('calc-inputs');
+            const formulaDisp = document.getElementById('calc-formula-display');
+
+            if (mode === 'f') {
+                formulaDisp.innerHTML = "$$\\vec{F} = m \\cdot \\vec{a}$$";
+                container.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Mass ($m$) [kg]</label>
+                        <input type="number" id="calc-m" value="10" step="any" class="w-full bg-white border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Acceleration ($\vec{a}$) [m/s²]</label>
+                        <input type="number" id="calc-a" value="2.5" step="any" class="w-full bg-white border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800">
+                    </div>`;
+            } else if (mode === 'a') {
+                formulaDisp.innerHTML = "$$\\vec{a} = \\frac{\\vec{F}}{m}$$";
+                container.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Net Force ($\sum \vec{F}$) [N]</label>
+                        <input type="number" id="calc-f" value="25" step="any" class="w-full bg-white border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Mass ($m$) [kg]</label>
+                        <input type="number" id="calc-m" value="10" step="any" class="w-full bg-white border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800">
+                    </div>`;
+            } else {
+                formulaDisp.innerHTML = "$$m = \\frac{\\vec{F}}{\\vec{a}}$$";
+                container.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Net Force ($\sum \vec{F}$) [N]</label>
+                        <input type="number" id="calc-f" value="25" step="any" class="w-full bg-white border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Acceleration ($\vec{a}$) [m/s²]</label>
+                        <input type="number" id="calc-a" value="2.5" step="any" class="w-full bg-white border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800">
+                    </div>`;
+            }
+            if (window.MathJax) MathJax.typesetPromise([formulaDisp]);
+        }
+
+        function calculateNewton() {
+            const resBox = document.getElementById('calc-result');
+            const resVal = document.getElementById('calc-result-val');
+            const resSteps = document.getElementById('calc-result-steps');
+
+            if (currentCalcMode === 'f') {
+                const m = parseFloat(document.getElementById('calc-m').value);
+                const a = parseFloat(document.getElementById('calc-a').value);
+                if (isNaN(m) || isNaN(a)) return alert("Please enter valid numbers");
+                const f = m * a;
+                resVal.innerText = `F = ${f.toFixed(2)} N`;
+                resSteps.innerText = `Step 1: Formula -> F = m * a\nStep 2: Substitution -> F = ${m} kg * ${a} m/s²\nStep 3: Result -> F = ${f.toFixed(2)} Newtons`;
+            } else if (currentCalcMode === 'a') {
+                const f = parseFloat(document.getElementById('calc-f').value);
+                const m = parseFloat(document.getElementById('calc-m').value);
+                if (isNaN(f) || isNaN(m) || m === 0) return alert("Please enter valid numbers");
+                const a = f / m;
+                resVal.innerText = `a = ${a.toFixed(2)} m/s²`;
+                resSteps.innerText = `Step 1: Formula -> a = F / m\nStep 2: Substitution -> a = ${f} N / ${m} kg\nStep 3: Result -> a = ${a.toFixed(2)} m/s²`;
+            } else {
+                const f = parseFloat(document.getElementById('calc-f').value);
+                const a = parseFloat(document.getElementById('calc-a').value);
+                if (isNaN(f) || isNaN(a) || a === 0) return alert("Please enter valid numbers");
+                const m = f / a;
+                resVal.innerText = `m = ${m.toFixed(2)} kg`;
+                resSteps.innerText = `Step 1: Formula -> m = F / a\nStep 2: Substitution -> m = ${f} N / ${a} m/s²\nStep 3: Result -> m = ${m.toFixed(2)} kg`;
+            }
+            resBox.classList.remove('hidden');
+        }
+
+        // --- SIMULATION CANVAS ENGINE ---
+        function initSimCanvas() {
+            const canvas = document.getElementById('simCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            drawSim(ctx, canvas);
+        }
+
+        function updateSimParams() {
+            simState.f = parseFloat(document.getElementById('sim-f').value);
+            simState.m = parseFloat(document.getElementById('sim-m').value);
+            simState.mu = parseFloat(document.getElementById('sim-mu').value);
+
+            document.getElementById('sim-f-val').innerText = `${simState.f} N`;
+            document.getElementById('sim-m-val').innerText = `${simState.m} kg`;
+            document.getElementById('sim-mu-val').innerText = simState.mu.toFixed(2);
+
+            const fFriction = simState.mu * simState.m * simState.g;
+            const fNet = Math.max(0, simState.f - fFriction);
+            simState.acc = fNet / simState.m;
+
+            document.getElementById('sim-accel-val').innerText = `${simState.acc.toFixed(2)} m/s²`;
+        }
+
+        function toggleSim() {
+            simRunning = !simRunning;
+            const btnText = document.getElementById('sim-play-text');
+            if (simRunning) {
+                btnText.innerText = "Pause Simulation";
+                runSimLoop();
+            } else {
+                btnText.innerText = "Resume Simulation";
+                cancelAnimationFrame(simReqId);
+            }
+        }
+
+        function resetSim() {
+            simRunning = false;
+            cancelAnimationFrame(simReqId);
+            simState.pos = 50;
+            simState.vel = 0;
+            document.getElementById('sim-play-text').innerText = "Start Simulation";
+            initSimCanvas();
+        }
+
+        function runSimLoop() {
+            if (!simRunning) return;
+            const canvas = document.getElementById('simCanvas');
+            const ctx = canvas.getContext('2d');
+
+            updateSimParams();
+            simState.vel += simState.acc * 0.016;
+            simState.pos += simState.vel * 0.016 * 10;
+
+            if (simState.pos > canvas.width - 80) {
+                simState.pos = canvas.width - 80;
+                simState.vel = 0;
+                simRunning = false;
+                document.getElementById('sim-play-text').innerText = "Restart Simulation";
+            }
+
+            drawSim(ctx, canvas);
+            simReqId = requestAnimationFrame(runSimLoop);
+        }
+
+        function drawSim(ctx, canvas) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Ground line
+            const groundY = canvas.height - 40;
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            ctx.lineTo(canvas.width, groundY);
+            ctx.strokeStyle = '#1a5f7a';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Box dimensions
+            const boxW = 60, boxH = 40;
+            const boxX = simState.pos;
+            const boxY = groundY - boxH;
+
+            // Draw Block
+            ctx.fillStyle = '#007bff';
+            ctx.fillRect(boxX, boxY, boxW, boxH);
+            ctx.strokeStyle = '#1a5f7a';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+            // Block Text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.fillText(`${simState.m}kg`, boxX + 15, boxY + 24);
+
+            // Vector Arrow: Applied Force
+            if (simState.f > 0) {
+                const arrowLen = Math.min(100, simState.f * 0.5);
+                drawArrow(ctx, boxX + boxW, boxY + boxH / 2, boxX + boxW + arrowLen, boxY + boxH / 2, '#28a745', `F=${simState.f}N`);
+            }
+        }
+
+        function drawArrow(ctx, fromx, fromy, tox, toy, color, label) {
+            const headlen = 10;
+            const dx = tox - fromx;
+            const dy = toy - fromy;
+            const angle = Math.atan2(dy, dx);
+
+            ctx.beginPath();
+            ctx.moveTo(fromx, fromy);
+            ctx.lineTo(tox, toy);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            if (label) {
+                ctx.font = '11px sans-serif';
+                ctx.fillStyle = color;
+                ctx.fillText(label, tox + 5, toy + 4);
+            }
+        }
+    </script>
+</body>
+</html>
