@@ -314,22 +314,22 @@
     <div class="chatbot-card">
       <h2>🤖 Physics AI Assistant</h2>
       <p style="font-size: 0.82rem; color: #666; margin-top: -5px; margin-bottom: 10px;">
-        Click a quick topic or type your query below:
+        Click a quick topic below or type your query:
       </p>
 
       <div class="chat-box" id="chatBox">
-        <div class="msg bot">Hello! Select a topic below or type a question to get instant explanations on forces and FBD!</div>
+        <div class="msg bot">Hello! Click a topic below for quick explanations, or click '✨ Explore More' to ask Gemini AI anything!</div>
       </div>
 
-      <!-- PRESET BUTTONS FOR QUICK LOCAL EXPLANATIONS -->
+      <!-- PRESET BUTTONS FOR LOCAL EXPLANATIONS -->
       <div class="preset-buttons">
-        <button class="chip-btn" onclick="selectPreset('Free Body Diagram')">Free Body Diagram</button>
-        <button class="chip-btn" onclick="selectPreset('Upthrust')">Upthrust</button>
-        <button class="chip-btn" onclick="selectPreset('Friction')">Friction</button>
-        <button class="chip-btn" onclick="selectPreset('Drag')">Drag</button>
-        <button class="chip-btn" onclick="selectPreset('Normal')">Normal</button>
-        <button class="chip-btn" onclick="selectPreset('Weight')">Weight</button>
-        <button class="chip-btn" onclick="selectPreset('Tension')">Tension</button>
+        <button class="chip-btn" onclick="triggerPreset('Free Body Diagram')">Free Body Diagram</button>
+        <button class="chip-btn" onclick="triggerPreset('Upthrust')">Upthrust</button>
+        <button class="chip-btn" onclick="triggerPreset('Friction')">Friction</button>
+        <button class="chip-btn" onclick="triggerPreset('Drag')">Drag</button>
+        <button class="chip-btn" onclick="triggerPreset('Normal')">Normal</button>
+        <button class="chip-btn" onclick="triggerPreset('Weight')">Weight</button>
+        <button class="chip-btn" onclick="triggerPreset('Tension')">Tension</button>
         <button class="chip-btn explore" onclick="openApiKeyModal()">✨ Explore More</button>
       </div>
 
@@ -363,8 +363,8 @@
 <!-- POPUP MODAL FOR EXPLORE MORE API KEY -->
 <div class="modal-overlay" id="apiKeyModal">
   <div class="modal-content">
-    <h3>✨ Unlock Gemini AI Mode</h3>
-    <p style="font-size: 0.88rem; color: #333; margin: 0;">Enter your Gemini API Key to enable open-ended chat exploration:</p>
+    <h3>✨ Explore More with Gemini AI</h3>
+    <p style="font-size: 0.88rem; color: #333; margin: 0;">Enter your Gemini API Key to ask any custom physics question:</p>
     <input type="text" id="modalApiKeyInput" placeholder="Paste API Key here..." />
     <div class="note">Ask your teacher for API Key</div>
     <div class="modal-actions">
@@ -459,7 +459,7 @@
   });
 
   // ===================================================
-  // 2. MODAL API KEY LOGIC
+  // 2. MODAL API KEY LOGIC (HANYA MUNCUL DI "EXPLORE MORE")
   // ===================================================
   function openApiKeyModal() {
     const existingKey = localStorage.getItem('customGeminiKey') || "";
@@ -475,22 +475,52 @@
     const key = document.getElementById('modalApiKeyInput').value.trim();
     if (key) {
       localStorage.setItem('customGeminiKey', key);
-      alert("API Key saved! Gemini AI exploration mode is now ACTIVE.");
+      alert("API Key saved! Custom Gemini AI search is now active.");
     } else {
       localStorage.removeItem('customGeminiKey');
-      alert("API Key cleared. Switched back to Preset Local mode.");
+      alert("API Key cleared.");
     }
     closeApiKeyModal();
   }
 
   // ===================================================
-  // 3. CHATBOT LOGIC (ENGLISH RESPONSES)
+  // 3. CHATBOT LOGIC
   // ===================================================
-  function selectPreset(topic) {
-    document.getElementById('chatInput').value = topic;
-    sendChatMessage();
+  
+  // 3A. PRESET TOMBOL LOKAL (LANGSUNG DIJAWAB LOKAL TANPA API KEY & POPUP)
+  function triggerPreset(topic) {
+    const chatBox = document.getElementById('chatBox');
+    
+    // Tampilkan pesan user di chat
+    chatBox.innerHTML += `<div class="msg user">${escapeHtml(topic)}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Jawaban lokal dalam Bahasa Inggris
+    let reply = "";
+    if (topic === 'Free Body Diagram') {
+      reply = "A Free Body Diagram (FBD) is a graphical illustration used to visualize the applied forces, moments, and resulting reactions acting on a body. Always draw force vectors starting from the object's center of mass!";
+    } else if (topic === 'Upthrust') {
+      reply = "Upthrust (or buoyant force) is an upward force exerted by a fluid opposing the weight of an immersed object. It depends on the fluid density and the displaced volume.";
+    } else if (topic === 'Friction') {
+      reply = "Friction is a resistive force acting parallel to contacting surfaces that opposes relative sliding motion. It includes static friction (before moving) and kinetic friction (while moving).";
+    } else if (topic === 'Drag') {
+      reply = "Drag is a mechanical fluid friction force opposing an object's motion through a fluid (liquid or gas). It increases significantly with higher speed.";
+    } else if (topic === 'Normal') {
+      reply = "Normal Force (N) is a support force exerted upon an object in contact with a surface. It always acts perpendicular (at 90 degrees) to the contact surface.";
+    } else if (topic === 'Weight') {
+      reply = "Weight (W) is the gravitational force exerted on an object by the Earth. It always points vertically downwards toward the center of the Earth (W = mg).";
+    } else if (topic === 'Tension') {
+      reply = "Tension (T) is a pulling force transmitted through a string, rope, or cable. It always acts along the direction of the string pulling away from the object.";
+    }
+
+    // Tampilkan balasan bot
+    setTimeout(() => {
+      chatBox.innerHTML += `<div class="msg bot">${reply}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }, 200);
   }
 
+  // 3B. CHAT INPUT BEBAS (MENGGUNAKAN GEMINI API DENGAN ENDPOINT GEMINI-3-FLASH-PREVIEW)
   function handleKeyPress(e) {
     if (e.key === 'Enter') sendChatMessage();
   }
@@ -507,32 +537,32 @@
     inputField.value = "";
     chatBox.scrollTop = chatBox.scrollHeight;
 
+    const apiKey = localStorage.getItem('customGeminiKey');
+
+    // Jika siswa mengetik sendiri tanpa API key, beri petunjuk untuk pakai Explore More
+    if (!apiKey) {
+      setTimeout(() => {
+        chatBox.innerHTML += `<div class="msg bot">To ask custom questions, please click <strong>'✨ Explore More'</strong> above and insert the API Key provided by your teacher!</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 300);
+      return;
+    }
+
     // Append Loading State
     const loadingId = "loading_" + Date.now();
     chatBox.innerHTML += `<div class="msg bot" id="${loadingId}"><em>Thinking...</em></div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-      const reply = await getAIResponse(question);
-      document.getElementById(loadingId).innerText = reply;
-    } catch (err) {
-      document.getElementById(loadingId).innerText = "Error: " + err.message;
-    }
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
+      // Menggunakan endpoint gemini-3-flash-preview yang sudah sukses dipraktekkan
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      
+      const promptSystem = `You are an encouraging and concise Physics Tutor Assistant for high school students. 
+Answer all queries specifically about Forces and Free Body Diagrams (FBD) in ENGLISH. 
+Keep your explanations short (maximum 2-3 brief sentences), clear, and engaging. 
+Query: ${question}`;
 
-  async function getAIResponse(userQuery) {
-    const apiKey = localStorage.getItem('customGeminiKey');
-
-    // IF API KEY IS PRESENT: Panggil Gemini API Langsung
-    if (apiKey) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-      const promptSystem = `You are a helpful and concise Physics Assistant for high school students. 
-Answer all user questions specifically about Forces and Free Body Diagrams (FBD) in ENGLISH. 
-Keep your explanations short (2-3 clear sentences maximum), encouraging, and easy to understand. 
-Query: ${userQuery}`;
-
-      const response = await fetch(url, {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -541,41 +571,18 @@ Query: ${userQuery}`;
       });
 
       if (!response.ok) {
-        throw new Error("Invalid API Key or connection issue. Please re-enter API Key via 'Explore More'.");
+        throw new Error("Invalid API Key or server error. Please re-check your key via 'Explore More'.");
       }
 
       const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
-    }
+      const reply = data.candidates[0].content.parts[0].text;
+      document.getElementById(loadingId).innerText = reply;
 
-    // IF NO API KEY: Local Preset Responses (ENGLISH)
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const query = userQuery.toLowerCase();
-
-    if (query.includes("free body") || query.includes("fbd") || query.includes("diagram")) {
-      return "A Free Body Diagram (FBD) is a graphical illustration used to visualize the applied forces, moments, and resulting reactions acting on a body in a given condition. Always draw force vectors originating from the object's center of mass!";
-    } 
-    else if (query.includes("upthrust") || query.includes("buoyancy") || query.includes("buoyant")) {
-      return "Upthrust (or buoyant force) is an upward force exerted by a fluid that opposes the weight of a partially or fully immersed object. It depends on the fluid's density and displaced volume.";
-    } 
-    else if (query.includes("friction")) {
-      return "Friction is a resistive force acting parallel to the interface that opposes relative sliding motion between two surfaces in contact. It includes static friction (before movement) and kinetic friction (during movement).";
-    } 
-    else if (query.includes("drag") || query.includes("air resistance")) {
-      return "Drag is a mechanical force generated by a solid object moving through a fluid (liquid or gas). It always acts in the direction opposite to the object's motion and increases with speed.";
-    } 
-    else if (query.includes("normal")) {
-      return "Normal Force (N) is the support force exerted upon an object that is in contact with another stable object. It always acts perpendicular (at 90 degrees) to the contact surface.";
-    } 
-    else if (query.includes("weight") || query.includes("gravity")) {
-      return "Weight (W) is the gravitational force exerted on an object by the Earth (or another astronomical body). It always points vertically downwards toward the center of the Earth (W = mg).";
-    } 
-    else if (query.includes("tension")) {
-      return "Tension (T) is the pulling force transmitted axially through a string, rope, cable, or wire when pulled by forces acting from opposite ends. It always pulls away from the object being analyzed.";
-    } 
-    else {
-      return "Select one of the preset topics above, or click '✨ Explore More' to enter an API key for open-ended questions!";
+    } catch (err) {
+      document.getElementById(loadingId).innerText = "Error: " + err.message;
     }
+    
+    chatBox.scrollTop = chatBox.scrollHeight;
   }
 
   // Helper XSS Prevention
