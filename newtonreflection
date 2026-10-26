@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewtonLab AI - Adaptive Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { --primary: #1a5f7a; --bg: #f4f6f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: #333; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="bg-[#1a5f7a] text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-2 rounded-xl"><i data-lucide="brain-circuit" class="w-6 h-6"></i></div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">NewtonLab AI</h1>
+                    <p class="text-xs text-cyan-200">Adaptive Practice Phase</p>
+                </div>
+            </div>
+            <nav class="flex space-x-2 text-sm">
+                <a href="https://stefanussetiawan1592-dev.github.io/forces/newton" class="px-4 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition">Back to Module</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center min-h-[500px]">
+        
+        <!-- SCREEN 1: ONBOARDING -->
+        <div id="screen-onboarding" class="bg-white border border-gray-200 rounded-2xl p-8 shadow-lg text-center fade-in">
+            <div class="inline-block bg-blue-100 p-4 rounded-full mb-4 text-[#1a5f7a]">
+                <i data-lucide="target" class="w-10 h-10"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-[#1a5f7a] mb-2">Welcome to Adaptive Practice</h2>
+            <p class="text-gray-600 mb-6">Enter your name to begin. The system will adapt to your skill level automatically.</p>
+            
+            <div class="max-w-md mx-auto space-y-6">
+                <input type="text" id="student-name" placeholder="Enter your Full Name" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-center text-lg focus:outline-none focus:border-[#1a5f7a] shadow-sm">
+                <button onclick="startPractice()" class="w-full bg-[#1a5f7a] hover:bg-blue-900 text-white font-bold py-3 rounded-xl transition flex items-center justify-center space-x-2">
+                    <span>Start Practice</span> <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: PRACTICE AREA -->
+        <div id="screen-practice" class="hidden flex-col gap-6 fade-in">
+            
+            <!-- Dashboard/Controls -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-2">
+                    <select id="topic-selector" onchange="changeTopic()" class="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-[#1a5f7a]">
+                        <option value="2">Newton's 2nd Law (Dynamics)</option>
+                        <option value="1">Newton's 1st Law (Equilibrium)</option>
+                        <option value="3">Pulley Systems</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm font-medium text-gray-500">Streak: <span id="streak-counter" class="font-bold text-green-600">0</span>/2</div>
+                    <div class="text-sm font-medium text-gray-500">Score: <span id="score-counter" class="font-bold text-blue-600">0</span></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-[#1a5f7a]"></div>
+                
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center space-x-2">
+                        <i data-lucide="help-circle" class="w-5 h-5 text-[#1a5f7a]"></i>
+                        <span>Question</span>
+                    </h3>
+                    <span id="level-badge" class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full uppercase tracking-wide">Level 1</span>
+                </div>
+
+                <!-- Text Soal (MathJax rendered) -->
+                <div id="question-text" class="text-gray-700 text-lg mb-8 leading-relaxed min-h-[100px]">
+                    <!-- Generated by JS -->
+                </div>
+
+                <!-- Clue Area -->
+                <div id="clue-area" class="hidden mb-6 space-y-2">
+                    <!-- Clues generated dynamically here -->
+                </div>
+
+                <!-- Input & Actions -->
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <div class="relative w-full sm:w-1/2">
+                        <input type="number" step="0.01" id="student-answer" placeholder="Your Answer (Value)" class="w-full bg-gray-50 border-2 border-gray-300 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-[#1a5f7a] transition font-mono">
+                    </div>
+                    <button onclick="checkAnswer()" class="w-full sm:w-auto bg-[#1a5f7a] hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+                        <span>Check Answer</span> <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    </button>
+                    <button id="btn-clue" onclick="showNextClue()" class="w-full sm:w-auto bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold py-3 px-6 rounded-xl transition flex items-center justify-center space-x-2">
+                        <i data-lucide="lightbulb" class="w-5 h-5"></i> <span>Need a Clue? (-50 pts)</span>
+                    </button>
+                </div>
+
+                <!-- Feedback -->
+                <div id="feedback-msg" class="mt-4 text-center font-bold text-lg hidden p-3 rounded-lg"></div>
+
+            </div>
+
+            <!-- Finish Button -->
+            <div class="flex justify-end mt-4">
+                <button onclick="finishPractice()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition flex items-center space-x-2">
+                    <i data-lucide="save" class="w-5 h-5"></i> <span>Save & Finish Session</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwzWB2hwHdaXkVeuxXbsSVXSb0Crn5H9v7NOaXUmYW_xZeN3IVnJGhfAndZHqLjtIBb5g/exec";
+        const g = 9.8; 
+
+        // State Variables
+        let studentName = "";
+        let currentLevel = 1;
+        let currentTopic = 2; // 1: N1, 2: N2, 3: Pulley
+        let streak = 0;
+        let totalScore = 0;
+        let currentQ = {}; // { text, ans, clues: [] }
+        let cluesRevealed = 0;
+        let attemptsOnCurrentQ = 0;
+        let historyLog = [];
+        let totalAttemptsOverall = 0;
+        let totalCluesUsed = 0;
+
+        function logEvent(action) {
+            const time = new Date().toLocaleTimeString('id-ID', { hour12: false });
+            historyLog.push(`[${time}] ${action}`);
+        }
+
+        // Random helpers
+        const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+        // --- QUESTION GENERATOR ---
+        function generateQuestion(topic, level) {
+            let qText = "", ans = 0, clues = [];
+
+            if (topic == 2) { // NEWTON 2
+                if (level === 1) {
+                    const m = randInt(8, 20) * 50; 
+                    const f1 = randInt(15, 30) * 10;
+                    const f2 = randInt(10, 20) * 10;
+                    
+                    const templates = [
+                        `A stalled car with a mass of $${m}$ kg is being pushed by two people on a flat road. Person A pushes with a force of $${f1}$ N to the right, and Person B pushes with $${f2}$ N in the same direction. Neglecting friction, what is the acceleration of the car in $m/s^2$?`,
+                        `Two engines are driving a space probe of mass $${m}$ kg. Engine 1 provides $${f1}$ N of thrust, and Engine 2 provides $${f2}$ N of thrust in the exact same direction. What is the probe's acceleration in $m/s^2$?`
+                    ];
+                    qText = pick(templates);
+                    ans = (f1 + f2) / m;
+                    clues = [
+                        "Clue 1: Since both forces are acting in the same direction, you should add them together to find the net force ($F_{net}$).",
+                        `Clue 2: The net force is $${f1} + ${f2} = ${f1+f2}$ N.`,
+                        "Clue 3: Now use Newton's Second Law: $a = F_{net} / m$. Divide the net force by the mass."
+                    ];
+                } else if (level === 2) {
+                    const m = randInt(1, 5) * 10; 
+                    const f = randInt(5, 15) * 10;
+                    const theta = pick([30, 37, 45, 53, 60]);
+                    
+                    const templates = [
+                        `A heavy suitcase of mass $${m}$ kg is pulled across a smooth airport floor by a strap at an angle of $${theta}^\\circ$ above the horizontal. If the pulling force is $${f}$ N, what is the horizontal acceleration of the suitcase in $m/s^2$?`,
+                        `A child pulls a $${m}$ kg wagon across a frictionless ice rink. The handle of the wagon makes an angle of $${theta}^\\circ$ with the ground. If the child pulls with a force of $${f}$ N, calculate the wagon's acceleration in $m/s^2$.`
+                    ];
+                    qText = pick(templates);
+                    ans = (f * Math.cos(theta * Math.PI/180)) / m;
+                    clues = [
+                        "Clue 1: The entire force isn't pulling horizontally. You need to find the horizontal component of the force ($F_x$).",
+                        `Clue 2: Use trigonometry to find the horizontal force: $F_x = F \\cdot \\cos(${theta}^\\circ)$.`,
+                        "Clue 3: Once you have $F_x$, use it as your net force in the equation $a = F_x / m$."
+                    ];
+                } else {
+                    const m = randInt(1, 5) * 10;
+                    const f = randInt(15, 25) * 10;
+                    const theta = pick([30, 37, 45, 53, 60]);
+                    const muk = (randInt(1, 4) / 10).toFixed(1);
+                    const t = randInt(2, 5);
+                    
+                    const templates = [
+                        `A wooden crate of mass $${m}$ kg is pulled by a rope at an angle of $${theta}^\\circ$ above the horizontal with a force of $${f}$ N. The coefficient of kinetic friction between the crate and the rough floor is $\\mu_k = ${muk}$. Starting from rest, how far does the crate move in $${t}$ seconds? (Use $g=9.8 \\; m/s^2$).`,
+                        `A sled of mass $${m}$ kg is being pulled across rough snow ($\\mu_k = ${muk}$) by a rope angled $${theta}^\\circ$ above the ground. The tension in the rope is $${f}$ N. If the sled starts from rest, calculate its displacement after $${t}$ seconds. (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    const Fy = f * Math.sin(theta * Math.PI/180);
+                    const N = (m * g) - Fy;
+                    const fk = muk * N;
+                    const Fx = f * Math.cos(theta * Math.PI/180);
+                    const a = (Fx - fk) / m;
+                    ans = 0.5 * a * (t * t);
+                    clues = [
+                        "Clue 1: Find the vertical forces to determine the Normal Force ($N$). It's not just $m\\cdot g$ because the angled rope is lifting it slightly: $N = m\\cdot g - F_y$.",
+                        "Clue 2: Calculate the kinetic friction ($f_k = \\mu_k \\cdot N$), then find the net horizontal force ($F_{net} = F_x - f_k$).",
+                        "Clue 3: Calculate the acceleration ($a = F_{net} / m$). Finally, use the kinematics equation $\\Delta x = \\frac{1}{2}at^2$ to find the distance."
+                    ];
+                }
+            } 
+            else if (topic == 1) { // NEWTON 1
+                if (level === 1) {
+                    const m = randInt(50, 150) * 10; 
+                    const templates = [
+                        `A small boat with a mass of $${m}$ kg is floating perfectly still on a calm lake. What is the magnitude of the buoyant force (upward force from water) acting on the boat? (Use $g=9.8 \\; m/s^2$, answer in N).`,
+                        `A hot air balloon of mass $${m}$ kg is hovering stationary in the air. What is the total upward lift force acting on the balloon? (Use $g=9.8 \\; m/s^2$, answer in N).`
+                    ];
+                    qText = pick(templates);
+                    ans = m * g;
+                    clues = [
+                        "Clue 1: The object is stationary, which means it is in equilibrium. The net force is zero.",
+                        "Clue 2: The total upward forces must exactly balance the total downward forces.",
+                        "Clue 3: The only downward force is gravity ($W = m \\cdot g$). Calculate the weight; the upward force must be exactly that value."
+                    ];
+                } else if (level === 2) {
+                    const m = randInt(5, 20); 
+                    const theta = pick([30, 45, 60]);
+                    const templates = [
+                        `A store signboard with a mass of $${m}$ kg is hung in equilibrium. It is supported by two ropes: Rope 1 is perfectly horizontal pulling left, and Rope 2 pulls up and to the right at an angle of $${theta}^\\circ$ with the ceiling. What is the tension in Rope 2? (Use $g=9.8 \\; m/s^2$).`,
+                        `A $${m}$ kg traffic light is supported by two cables. One cable is horizontal to the left. The other cable makes an angle of $${theta}^\\circ$ with the vertical pole (or $${90-theta}^\\circ$ with horizontal). Calculate the tension in the angled cable. (Use $g=9.8 \\; m/s^2$, assume angle is relative to ceiling).`
+                    ];
+                    qText = pick(templates);
+                    ans = (m * g) / Math.sin(theta * Math.PI/180);
+                    clues = [
+                        "Clue 1: Focus on the vertical (Y-axis) forces. The horizontal rope doesn't help support the weight.",
+                        `Clue 2: Only the vertical component of the angled rope supports the weight. The vertical component is $T_2 \\cdot \\sin(${theta}^\\circ)$.`,
+                        "Clue 3: Set the vertical component equal to the weight: $T_2 \\cdot \\sin(\\theta) = m \\cdot g$. Solve for $T_2$."
+                    ];
+                } else {
+                    const m = randInt(5, 15);
+                    const theta = pick([30, 45, 60]);
+                    const templates = [
+                        `A $${m}$ kg chandelier is hung from the ceiling by two identical ropes forming a V-shape. Both ropes make an angle of $${theta}^\\circ$ with the ceiling. Calculate the tension in ONE of the ropes. (Use $g=9.8 \\; m/s^2$).`,
+                        `A gymnast of mass $${m}$ kg hangs stationary from a pair of gym rings. The straps attached to the rings both make an angle of $${theta}^\\circ$ with the ceiling. Calculate the tension in one of the straps. (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    ans = (m * g) / (2 * Math.sin(theta * Math.PI/180));
+                    clues = [
+                        "Clue 1: Both ropes are helping to pull upwards to counteract gravity.",
+                        "Clue 2: The total upward force is the sum of the vertical components of BOTH ropes: $2 \\cdot (T \\cdot \\sin\\theta)$.",
+                        "Clue 3: Set the total upward force equal to the weight: $2 \\cdot T \\cdot \\sin(\\theta) = m \\cdot g$. Solve for T."
+                    ];
+                }
+            }
+            else { // PULLEY
+                if (level === 1) {
+                    const m1 = randInt(3, 8);
+                    const m2 = randInt(10, 15);
+                    const templates = [
+                        `In a standard Atwood machine (vertical pulley), Mass 1 is $${m1}$ kg and Mass 2 is $${m2}$ kg. Assuming a frictionless and massless pulley, calculate the acceleration of the system. (Use $g=9.8 \\; m/s^2$).`,
+                        `Two buckets are connected by a light rope over a smooth pulley. Bucket A has mass $${m1}$ kg and Bucket B has mass $${m2}$ kg. When released from rest, what is the acceleration of the buckets? (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    ans = g * (m2 - m1) / (m1 + m2);
+                    clues = [
+                        "Clue 1: The heavier mass drives the system downwards, while the lighter mass holds it back. The net force is the difference in their weights.",
+                        "Clue 2: The Net Driving Force is $W_2 - W_1 = (m_2 \\cdot g) - (m_1 \\cdot g)$.",
+                        "Clue 3: The force has to accelerate BOTH masses. Use $a = F_{net} / (m_1 + m_2)$."
+                    ];
+                } else if (level === 2) {
+                    const m1 = randInt(5, 15); 
+                    const m2 = randInt(5, 10); 
+                    const muk = (randInt(1, 4) / 10).toFixed(1);
+                    const templates = [
+                        `Mass 1 ($${m1}$ kg) rests on a rough horizontal table ($\\mu_k = ${muk}$) and is connected by a string over a pulley to a hanging Mass 2 ($${m2}$ kg). Assuming Mass 2 falls, what is the acceleration of the system? (Use $g=9.8 \\; m/s^2$).`,
+                        `A $${m1}$ kg block on a rough desk ($\\mu_k = ${muk}$) is attached via a pulley to a hanging $${m2}$ kg weight. When released, what is the system's acceleration? (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    const w2 = m2 * g;
+                    const fk = muk * m1 * g;
+                    ans = (w2 - fk) / (m1 + m2);
+                    if (ans < 0) ans = 0; 
+                    clues = [
+                        "Clue 1: Mass 1 is on the table, so its gravity doesn't pull the system along the string. The only forward driving force is the weight of the hanging mass ($W_2$).",
+                        "Clue 2: The table is rough, so friction acts on Mass 1 opposing the motion. Calculate kinetic friction: $f_k = \\mu_k \\cdot m_1 \\cdot g$.",
+                        "Clue 3: The Net Driving Force is $W_2 - f_k$. Divide this net force by the total mass ($m_1 + m_2$) to find acceleration."
+                    ];
+                } else {
+                    const m1 = randInt(5, 10); 
+                    const theta = pick([30, 45, 60]);
+                    const m2 = randInt(15, 25); 
+                    const templates = [
+                        `Mass 1 ($${m1}$ kg) is on a smooth inclined plane at $${theta}^\\circ$ to the horizontal. It is connected over a pulley at the top of the incline to a hanging Mass 2 ($${m2}$ kg). Calculate the magnitude of acceleration of the system. (Use $g=9.8 \\; m/s^2$).`,
+                        `A cart of mass $${m1}$ kg rests on a frictionless ramp angled at $${theta}^\\circ$. A rope tied to the cart goes over a pulley to a hanging counterweight of $${m2}$ kg. Find the acceleration of the system. (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    const w2 = m2 * g;
+                    const w1x = m1 * g * Math.sin(theta * Math.PI/180);
+                    ans = Math.abs(w2 - w1x) / (m1 + m2);
+                    clues = [
+                        "Clue 1: This is a tug-of-war. The hanging mass pulls in one direction, while the mass on the incline pulls in the opposite direction.",
+                        "Clue 2: Calculate the pulling forces: The hanging mass pulls with $W_2 = m_2 \\cdot g$. The mass on the incline pulls with $W_{1x} = m_1 \\cdot g \\cdot \\sin(\\theta)$.",
+                        "Clue 3: The Net Driving Force is the absolute difference between those two forces. Divide the net force by the total mass ($m_1 + m_2$) to find acceleration."
+                    ];
+                }
+            }
+
+            return { text: qText, ans: ans, clues: clues };
+        }
+
+        // --- UI & LOGIC FUNCTIONS ---
+        function startPractice() {
+            const name = document.getElementById('student-name').value.trim();
+            if (!name) return alert("Please enter your name!");
+            studentName = name;
+            
+            document.getElementById('screen-onboarding').classList.add('hidden');
+            document.getElementById('screen-practice').classList.remove('hidden');
+            document.getElementById('screen-practice').classList.add('flex');
+            
+            currentTopic = parseInt(document.getElementById('topic-selector').value);
+            logEvent(`Started Practice. Initial Topic: ${currentTopic}`);
+            
+            loadNewQuestion();
+        }
+
+        function changeTopic() {
+            currentTopic = parseInt(document.getElementById('topic-selector').value);
+            currentLevel = 1; // Reset level on topic change
+            streak = 0;
+            logEvent(`Changed Topic to ${currentTopic}. Level reset to 1.`);
+            loadNewQuestion();
+        }
+
+        function loadNewQuestion() {
+            updateUI();
+            
+            // Reset question state
+            cluesRevealed = 0;
+            attemptsOnCurrentQ = 0;
+            
+            // Generate New Question
+            currentQ = generateQuestion(currentTopic, currentLevel);
+            document.getElementById('question-text').innerHTML = currentQ.text;
+            
+            // Reset Clue Area
+            const clueArea = document.getElementById('clue-area');
+            clueArea.innerHTML = '';
+            clueArea.classList.add('hidden');
+            document.getElementById('btn-clue').disabled = false;
+            document.getElementById('btn-clue').innerHTML = `<i data-lucide="lightbulb" class="w-5 h-5"></i> <span>Need a Clue? (-50 pts)</span>`;
+            
+            // Render MathJax
+            MathJax.typesetPromise([document.getElementById('question-text')]);
+
+            // Reset Input/Feedback
+            document.getElementById('student-answer').value = "";
+            document.getElementById('feedback-msg').classList.add('hidden');
+            
+            lucide.createIcons();
+        }
+
+        function updateUI() {
+            document.getElementById('streak-counter').innerText = streak;
+            document.getElementById('score-counter').innerText = totalScore;
+            document.getElementById('level-badge').innerText = "Level " + currentLevel;
+            
+            // Color badges
+            const badge = document.getElementById('level-badge');
+            badge.className = "px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wide ";
+            if (currentLevel === 1) badge.className += "bg-blue-100 text-blue-800";
+            if (currentLevel === 2) badge.className += "bg-green-100 text-green-800";
+            if (currentLevel === 3) badge.className += "bg-red-100 text-red-800";
+        }
+
+        function showNextClue() {
+            if (cluesRevealed >= 3) return;
+            
+            totalScore -= 50;
+            totalCluesUsed++;
+            updateUI();
+            
+            const clueArea = document.getElementById('clue-area');
+            clueArea.classList.remove('hidden');
+            
+            const clueHtml = `
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg fade-in">
+                    <p class="text-sm text-amber-800 font-medium">${currentQ.clues[cluesRevealed]}</p>
+                </div>
+            `;
+            clueArea.innerHTML += clueHtml;
+            MathJax.typesetPromise([clueArea]);
+            
+            logEvent(`Requested Clue ${cluesRevealed + 1} (Topic ${currentTopic} L${currentLevel}). Score: ${totalScore}`);
+            
+            cluesRevealed++;
+            if (cluesRevealed >= 3) {
+                const btn = document.getElementById('btn-clue');
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="info" class="w-5 h-5"></i> <span>All Clues Revealed</span>`;
+            }
+            lucide.createIcons();
+        }
+
+        function checkAnswer() {
+            const inputVal = document.getElementById('student-answer').value;
+            if (inputVal === "") return alert("Please enter a numeric answer!");
+            
+            attemptsOnCurrentQ++;
+            totalAttemptsOverall++;
+            const studentAns = parseFloat(inputVal);
+            const correctAns = currentQ.ans;
+            
+            // Tolerance
+            const isCorrect = Math.abs(studentAns - correctAns) < (Math.max(0.1, correctAns * 0.02));
+            const feedback = document.getElementById('feedback-msg');
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+
+            if (isCorrect) {
+                totalScore += 1000;
+                streak++;
+                logEvent(`Correct Answer (Topic ${currentTopic} L${currentLevel}) on attempt ${attemptsOnCurrentQ}. Streak: ${streak}. Score: ${totalScore}`);
+                feedback.classList.add('bg-green-100', 'text-green-800');
+                
+                if (streak >= 2 && currentLevel < 3) {
+                    feedback.innerHTML = `<i data-lucide="trending-up" class="inline w-5 h-5 mr-1"></i> Brilliant! You got 2 right in a row. Leveling up to Level ${currentLevel + 1}!`;
+                    currentLevel++;
+                    setTimeout(() => { streak = 0; loadNewQuestion(); }, 2500);
+                } 
+                else if (streak >= 2 && currentLevel === 3) {
+                    feedback.innerHTML = `<i data-lucide="award" class="inline w-5 h-5 mr-1"></i> Mastered! You've conquered Level 3. Try another topic or finish!`;
+                    // Stay at level 3, reset streak
+                    streak = 0; 
+                    setTimeout(() => { loadNewQuestion(); }, 2500);
+                }
+                else {
+                    feedback.innerHTML = `<i data-lucide="check" class="inline w-5 h-5 mr-1"></i> Correct! (+1000 pts). One more right answer to level up.`;
+                    setTimeout(() => { loadNewQuestion(); }, 2000); 
+                }
+            } else {
+                totalScore -= 100;
+                streak = 0;
+                logEvent(`Incorrect Answer (Topic ${currentTopic} L${currentLevel}). Input: ${studentAns}. Score: ${totalScore}`);
+                feedback.classList.add('bg-red-100', 'text-red-800');
+                feedback.innerHTML = `<i data-lucide="x" class="inline w-5 h-5 mr-1"></i> Incorrect (-100 pts). Try again or request a clue.`;
+                // If they have tried 3 times, maybe offer a new question
+                if(attemptsOnCurrentQ >= 3) {
+                    feedback.innerHTML += `<br><span class="text-sm mt-1">Let's try a different question with similar difficulty.</span>`;
+                    setTimeout(() => { loadNewQuestion(); }, 3000);
+                }
+            }
+            updateUI();
+            lucide.createIcons();
+        }
+
+        async function finishPractice() {
+            if(historyLog.length === 0) return alert("You haven't practiced yet!");
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> <span>Saving Data...</span>`;
+            
+            const finalLog = historyLog.join(" || ");
+
+            try {
+                // Submit to GAS
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sheetTarget: "newton_reflection",
+                        studentName: studentName,
+                        finalLevel: `Level ${currentLevel} (Topic ${currentTopic})`, 
+                        attempt: `Att: ${totalAttemptsOverall}, Clues: ${totalCluesUsed}, Score: ${totalScore}`,
+                        history: finalLog
+                    })
+                });
+                alert(`Excellent session, ${studentName}! Your final score is ${totalScore}. Your progress has been recorded.`);
+                location.reload();
+            } catch (error) {
+                alert("Network error, but session completed locally.");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+    </script>
+</body>
+</html>
