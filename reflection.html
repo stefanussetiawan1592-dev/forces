@@ -1,601 +1,491 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Physics Module - Post-Learning Reflection</title>
-  <style>
-    :root {
-      --primary: #1a5f7a;
-      --secondary: #007bff;
-      --accent: #28a745;
-      --bg: #f4f6f9;
-      --card-bg: #ffffff;
-      --text: #333333;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-    header {
-      background: var(--primary);
-      color: white;
-      text-align: center;
-      padding: 25px 20px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    header h1 { margin: 0; font-size: 2.1rem; }
-    header p { margin-top: 8px; opacity: 0.9; }
-
-    /* TOP SECTION LAYOUT: 2/3 FORM + 1/3 CHATBOT */
-    .top-layout {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-    }
-    .reflection-card {
-      flex: 2;
-      min-width: 320px;
-      background: var(--card-bg);
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    .chatbot-card {
-      flex: 1;
-      min-width: 280px;
-      background: var(--card-bg);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      display: flex;
-      flex-direction: column;
-      border-top: 4px solid var(--secondary);
-    }
-
-    h2 { color: var(--primary); margin-top: 0; font-size: 1.3rem; }
-
-    .form-group {
-      margin-bottom: 18px;
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #2c3e50;
-    }
-    input[type="text"], textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-family: inherit;
-      font-size: 0.95rem;
-      box-sizing: border-box;
-    }
-    textarea { resize: vertical; }
-
-    .btn {
-      padding: 12px 25px;
-      border: none;
-      border-radius: 6px;
-      background: var(--accent);
-      color: white;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .btn:hover { opacity: 0.9; }
-    .btn:disabled { background: #ccc; cursor: not-allowed; }
-
-    /* CHATBOT COMPONENTS */
-    .chat-box {
-      flex: 1;
-      min-height: 220px;
-      max-height: 280px;
-      overflow-y: auto;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 12px;
-      background: #f8f9fa;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      font-size: 0.88rem;
-    }
-    .msg {
-      padding: 8px 12px;
-      border-radius: 8px;
-      max-width: 85%;
-      word-wrap: break-word;
-    }
-    .msg.bot {
-      background: #eef7fc;
-      color: #1a5f7a;
-      align-self: flex-start;
-      border-left: 3px solid var(--secondary);
-    }
-    .msg.user {
-      background: var(--secondary);
-      color: white;
-      align-self: flex-end;
-    }
-
-    /* CHAT PRESET BUTTONS */
-    .preset-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-    .chip-btn {
-      background: #e2e8f0;
-      color: #1e293b;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .chip-btn:hover {
-      background: #cbd5e1;
-    }
-    .chip-btn.explore {
-      background: #17a2b8;
-      color: white;
-    }
-    .chip-btn.explore:hover {
-      background: #138496;
-    }
-
-    .chat-input-group {
-      display: flex;
-      gap: 8px;
-    }
-    .chat-input-group input {
-      flex: 1;
-      padding: 8px 10px;
-      font-size: 0.88rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    .chat-input-group button {
-      padding: 8px 15px;
-      background: var(--secondary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    /* POPUP MODAL STYLES FOR API KEY */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    .modal-content {
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      max-width: 400px;
-      width: 90%;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      text-align: center;
-    }
-    .modal-content h3 { margin-top: 0; color: var(--primary); }
-    .modal-content input { margin: 15px 0 5px 0; }
-    .modal-content .note { font-size: 0.8rem; color: #666; font-style: italic; margin-bottom: 15px; }
-    .modal-actions { display: flex; justify-content: center; gap: 10px; }
-    .btn-modal { padding: 8px 18px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-    .btn-save { background: var(--accent); color: white; }
-    .btn-close { background: #6c757d; color: white; }
-
-    /* BOTTOM SECTION: PEER REFLECTION WALL (2 COLUMNS) */
-    .comments-board {
-      background: var(--card-bg);
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    .comments-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 18px;
-      margin-top: 15px;
-    }
-    .comment-item {
-      background: #f8f9fa;
-      border-top: 4px solid var(--secondary);
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-    }
-    .comment-header {
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      color: var(--primary);
-      margin-bottom: 8px;
-      border-bottom: 1px dashed #ddd;
-      padding-bottom: 6px;
-      font-size: 0.95rem;
-    }
-    .comment-time {
-      font-size: 0.8rem;
-      color: #777;
-      font-weight: normal;
-    }
-    .comment-text {
-      margin: 6px 0 0 0;
-      color: #444;
-      font-size: 0.92rem;
-      white-space: pre-line;
-    }
-
-    /* NAVIGATION BUTTON AT THE VERY BOTTOM */
-    .nav-bottom-container {
-      margin-top: 35px;
-      text-align: center;
-      padding-bottom: 20px;
-    }
-    .btn-next-page {
-      display: inline-block;
-      padding: 14px 28px;
-      background: var(--primary);
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      transition: background 0.2s, transform 0.2s;
-    }
-    .btn-next-page:hover {
-      background: #13465a;
-      transform: translateY(-2px);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewtonLab AI - Adaptive Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root { --primary: #1a5f7a; --bg: #f4f6f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: #333; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-<div class="container">
-  <header>
-    <h1>🎓 Peer Reflection Board & AI Assistant</h1>
-    <p>Consolidate your physics learning, ask AI for instant help, and read insights from peers!</p>
-  </header>
+    <!-- HEADER -->
+    <header class="bg-[#1a5f7a] text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-2 rounded-xl"><i data-lucide="brain-circuit" class="w-6 h-6"></i></div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">NewtonLab AI</h1>
+                    <p class="text-xs text-cyan-200">Adaptive Practice Phase</p>
+                </div>
+            </div>
+            <nav class="flex space-x-2 text-sm">
+                <a href="https://stefanussetiawan1592-dev.github.io/forces/newton" class="px-4 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition">Back to Module</a>
+            </nav>
+        </div>
+    </header>
 
-  <!-- TOP SECTION: FORM (2/3) + CHATBOT (1/3) -->
-  <div class="top-layout">
-    
-    <!-- REFLECTION FORM (2/3 PORTION) -->
-    <div class="reflection-card">
-      <h2>Post Your Reflection</h2>
-      <form id="reflectionForm">
-        <div class="form-group">
-          <label for="studentName">Your Full Name:</label>
-          <input type="text" id="studentName" placeholder="Enter your full name..." required>
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center min-h-[500px]">
+        
+        <!-- SCREEN 1: ONBOARDING -->
+        <div id="screen-onboarding" class="bg-white border border-gray-200 rounded-2xl p-8 shadow-lg text-center fade-in">
+            <div class="inline-block bg-blue-100 p-4 rounded-full mb-4 text-[#1a5f7a]">
+                <i data-lucide="target" class="w-10 h-10"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-[#1a5f7a] mb-2">Welcome to Adaptive Practice</h2>
+            <p class="text-gray-600 mb-6">Enter your name to begin. The system will adapt to your skill level automatically.</p>
+            
+            <div class="max-w-md mx-auto space-y-6">
+                <input type="text" id="student-name" placeholder="Enter your Full Name" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-center text-lg focus:outline-none focus:border-[#1a5f7a] shadow-sm">
+                <button onclick="startPractice()" class="w-full bg-[#1a5f7a] hover:bg-blue-900 text-white font-bold py-3 rounded-xl transition flex items-center justify-center space-x-2">
+                    <span>Start Practice</span> <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+            </div>
         </div>
 
-        <div class="form-group">
-          <label for="qReflection">Reflect on your learning journey:</label>
-          <p style="margin-top: -4px; margin-bottom: 8px; font-size: 0.88rem; color: #666;">
-            <em>Do you fully understand Free Body Diagrams (FBD) and force types? What interesting questions or phenomena would you like to explore further?</em>
-          </p>
-          <textarea id="qReflection" rows="6" placeholder="Write your thoughts, masteries, or remaining questions here..." required></textarea>
+        <!-- SCREEN 2: PRACTICE AREA -->
+        <div id="screen-practice" class="hidden flex-col gap-6 fade-in">
+            
+            <!-- Dashboard/Controls -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-2">
+                    <select id="topic-selector" onchange="changeTopic()" class="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-[#1a5f7a]">
+                        <option value="2">Newton's 2nd Law (Dynamics)</option>
+                        <option value="1">Newton's 1st Law (Equilibrium)</option>
+                        <option value="3">Pulley Systems</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm font-medium text-gray-500">Streak: <span id="streak-counter" class="font-bold text-green-600">0</span>/2</div>
+                    <div class="text-sm font-medium text-gray-500">Score: <span id="score-counter" class="font-bold text-blue-600">0</span></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-[#1a5f7a]"></div>
+                
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center space-x-2">
+                        <i data-lucide="help-circle" class="w-5 h-5 text-[#1a5f7a]"></i>
+                        <span>Question</span>
+                    </h3>
+                    <span id="level-badge" class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full uppercase tracking-wide">Level 1</span>
+                </div>
+
+                <!-- Text Soal (MathJax rendered) -->
+                <div id="question-text" class="text-gray-700 text-lg mb-8 leading-relaxed min-h-[100px]">
+                    <!-- Generated by JS -->
+                </div>
+
+                <!-- Clue Area -->
+                <div id="clue-area" class="hidden mb-6 space-y-2">
+                    <!-- Clues generated dynamically here -->
+                </div>
+
+                <!-- Input & Actions -->
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <div class="relative w-full sm:w-1/2">
+                        <input type="number" step="0.01" id="student-answer" placeholder="Your Answer (Value)" class="w-full bg-gray-50 border-2 border-gray-300 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-[#1a5f7a] transition font-mono">
+                    </div>
+                    <button onclick="checkAnswer()" class="w-full sm:w-auto bg-[#1a5f7a] hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+                        <span>Check Answer</span> <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    </button>
+                    <button id="btn-clue" onclick="showNextClue()" class="w-full sm:w-auto bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold py-3 px-6 rounded-xl transition flex items-center justify-center space-x-2">
+                        <i data-lucide="lightbulb" class="w-5 h-5"></i> <span>Need a Clue? (-50 pts)</span>
+                    </button>
+                </div>
+
+                <!-- Feedback -->
+                <div id="feedback-msg" class="mt-4 text-center font-bold text-lg hidden p-3 rounded-lg"></div>
+
+            </div>
+
+            <!-- Finish Button -->
+            <div class="flex justify-end mt-4">
+                <button onclick="finishPractice()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition flex items-center space-x-2">
+                    <i data-lucide="save" class="w-5 h-5"></i> <span>Save & Finish Session</span>
+                </button>
+            </div>
         </div>
 
-        <button type="submit" class="btn" id="submitBtn">Submit & Share Reflection</button>
-      </form>
-    </div>
+    </main>
 
-    <!-- AI CHATBOT ASSISTANT (1/3 PORTION) -->
-    <div class="chatbot-card">
-      <h2>🤖 Physics AI Assistant</h2>
-      <p style="font-size: 0.82rem; color: #666; margin-top: -5px; margin-bottom: 10px;">
-        Click a quick topic below or type your query:
-      </p>
+    <script>
+        lucide.createIcons();
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwzWB2hwHdaXkVeuxXbsSVXSb0Crn5H9v7NOaXUmYW_xZeN3IVnJGhfAndZHqLjtIBb5g/exec";
+        const g = 9.8; 
 
-      <div class="chat-box" id="chatBox">
-        <div class="msg bot">Hello! Click a topic below for quick explanations, or click '✨ Explore More' to ask Gemini AI anything!</div>
-      </div>
+        // State Variables
+        let studentName = "";
+        let currentLevel = 1;
+        let currentTopic = 2; // 1: N1, 2: N2, 3: Pulley
+        let streak = 0;
+        let totalScore = 0;
+        let currentQ = {}; // { text, ans, clues: [] }
+        let cluesRevealed = 0;
+        let attemptsOnCurrentQ = 0;
+        let historyLog = [];
+        let totalAttemptsOverall = 0;
+        let totalCluesUsed = 0;
 
-      <!-- PRESET BUTTONS FOR LOCAL EXPLANATIONS -->
-      <div class="preset-buttons">
-        <button class="chip-btn" onclick="triggerPreset('Free Body Diagram')">Free Body Diagram</button>
-        <button class="chip-btn" onclick="triggerPreset('Upthrust')">Upthrust</button>
-        <button class="chip-btn" onclick="triggerPreset('Friction')">Friction</button>
-        <button class="chip-btn" onclick="triggerPreset('Drag')">Drag</button>
-        <button class="chip-btn" onclick="triggerPreset('Normal')">Normal</button>
-        <button class="chip-btn" onclick="triggerPreset('Weight')">Weight</button>
-        <button class="chip-btn" onclick="triggerPreset('Tension')">Tension</button>
-        <button class="chip-btn explore" onclick="openApiKeyModal()">✨ Explore More</button>
-      </div>
+        function logEvent(action) {
+            const time = new Date().toLocaleTimeString('id-ID', { hour12: false });
+            historyLog.push(`[${time}] ${action}`);
+        }
 
-      <div class="chat-input-group">
-        <input type="text" id="chatInput" placeholder="Ask a question..." onkeypress="handleKeyPress(event)">
-        <button onclick="sendChatMessage()" id="chatSendBtn">Send</button>
-      </div>
-    </div>
+        // Random helpers
+        const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  </div>
+        // --- QUESTION GENERATOR ---
+        function generateQuestion(topic, level) {
+            let qText = "", ans = 0, clues = [];
 
-  <!-- BOTTOM SECTION: PEER REFLECTIONS WALL (2 COLUMNS GRID) -->
-  <div class="comments-board">
-    <h2>💬 Peer Reflection Wall</h2>
-    <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">Read reflections submitted by your classmates below:</p>
-    
-    <div id="reflectionGrid" class="comments-grid">
-      <p style="grid-column: 1 / -1; text-align: center; color: #777;"><em>Loading reflections from peers...</em></p>
-    </div>
-  </div>
+            if (topic == 2) { // NEWTON 2
+                if (level === 1) {
+                    const m = randInt(8, 20) * 50; 
+                    const f1 = randInt(15, 30) * 10;
+                    const f2 = randInt(10, 20) * 10;
+                    
+                    const templates = [
+                        `A stalled car with a mass of $${m}$ kg is being pushed by two people on a flat road. Person A pushes with a force of $${f1}$ N to the right, and Person B pushes with $${f2}$ N in the same direction. Neglecting friction, what is the acceleration of the car in $m/s^2$?`,
+                        `Two engines are driving a space probe of mass $${m}$ kg. Engine 1 provides $${f1}$ N of thrust, and Engine 2 provides $${f2}$ N of thrust in the exact same direction. What is the probe's acceleration in $m/s^2$?`
+                    ];
+                    qText = pick(templates);
+                    ans = (f1 + f2) / m;
+                    clues = [
+                        "Clue 1: Since both forces are acting in the same direction, you should add them together to find the net force ($F_{net}$).",
+                        `Clue 2: The net force is $${f1} + ${f2} = ${f1+f2}$ N.`,
+                        "Clue 3: Now use Newton's Second Law: $a = F_{net} / m$. Divide the net force by the mass."
+                    ];
+                } else if (level === 2) {
+                    const m = randInt(1, 5) * 10; 
+                    const f = randInt(5, 15) * 10;
+                    const theta = pick([30, 37, 45, 53, 60]);
+                    
+                    const templates = [
+                        `A heavy suitcase of mass $${m}$ kg is pulled across a smooth airport floor by a strap at an angle of $${theta}^\\circ$ above the horizontal. If the pulling force is $${f}$ N, what is the horizontal acceleration of the suitcase in $m/s^2$?`,
+                        `A child pulls a $${m}$ kg wagon across a frictionless ice rink. The handle of the wagon makes an angle of $${theta}^\\circ$ with the ground. If the child pulls with a force of $${f}$ N, calculate the wagon's acceleration in $m/s^2$.`
+                    ];
+                    qText = pick(templates);
+                    ans = (f * Math.cos(theta * Math.PI/180)) / m;
+                    clues = [
+                        "Clue 1: The entire force isn't pulling horizontally. You need to find the horizontal component of the force ($F_x$).",
+                        `Clue 2: Use trigonometry to find the horizontal force: $F_x = F \\cdot \\cos(${theta}^\\circ)$.`,
+                        "Clue 3: Once you have $F_x$, use it as your net force in the equation $a = F_x / m$."
+                    ];
+                } else {
+                    const m = randInt(1, 5) * 10;
+                    const f = randInt(15, 25) * 10;
+                    const theta = pick([30, 37, 45, 53, 60]);
+                    const muk = (randInt(1, 4) / 10).toFixed(1);
+                    const t = randInt(2, 5);
+                    
+                    const templates = [
+                        `A wooden crate of mass $${m}$ kg is pulled by a rope at an angle of $${theta}^\\circ$ above the horizontal with a force of $${f}$ N. The coefficient of kinetic friction between the crate and the rough floor is $\\mu_k = ${muk}$. Starting from rest, how far does the crate move in $${t}$ seconds? (Use $g=9.8 \\; m/s^2$).`,
+                        `A sled of mass $${m}$ kg is being pulled across rough snow ($\\mu_k = ${muk}$) by a rope angled $${theta}^\\circ$ above the ground. The tension in the rope is $${f}$ N. If the sled starts from rest, calculate its displacement after $${t}$ seconds. (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    const Fy = f * Math.sin(theta * Math.PI/180);
+                    const N = (m * g) - Fy;
+                    const fk = muk * N;
+                    const Fx = f * Math.cos(theta * Math.PI/180);
+                    const a = (Fx - fk) / m;
+                    ans = 0.5 * a * (t * t);
+                    clues = [
+                        "Clue 1: Find the vertical forces to determine the Normal Force ($N$). It's not just $m\\cdot g$ because the angled rope is lifting it slightly: $N = m\\cdot g - F_y$.",
+                        "Clue 2: Calculate the kinetic friction ($f_k = \\mu_k \\cdot N$), then find the net horizontal force ($F_{net} = F_x - f_k$).",
+                        "Clue 3: Calculate the acceleration ($a = F_{net} / m$). Finally, use the kinematics equation $\\Delta x = \\frac{1}{2}at^2$ to find the distance."
+                    ];
+                }
+            } 
+            else if (topic == 1) { // NEWTON 1
+                if (level === 1) {
+                    const m = randInt(50, 150) * 10; 
+                    const templates = [
+                        `A small boat with a mass of $${m}$ kg is floating perfectly still on a calm lake. What is the magnitude of the buoyant force (upward force from water) acting on the boat? (Use $g=9.8 \\; m/s^2$, answer in N).`,
+                        `A hot air balloon of mass $${m}$ kg is hovering stationary in the air. What is the total upward lift force acting on the balloon? (Use $g=9.8 \\; m/s^2$, answer in N).`
+                    ];
+                    qText = pick(templates);
+                    ans = m * g;
+                    clues = [
+                        "Clue 1: The object is stationary, which means it is in equilibrium. The net force is zero.",
+                        "Clue 2: The total upward forces must exactly balance the total downward forces.",
+                        "Clue 3: The only downward force is gravity ($W = m \\cdot g$). Calculate the weight; the upward force must be exactly that value."
+                    ];
+                } else if (level === 2) {
+                    const m = randInt(5, 20); 
+                    const theta = pick([30, 45, 60]);
+                    const templates = [
+                        `A store signboard with a mass of $${m}$ kg is hung in equilibrium. It is supported by two ropes: Rope 1 is perfectly horizontal pulling left, and Rope 2 pulls up and to the right at an angle of $${theta}^\\circ$ with the ceiling. What is the tension in Rope 2? (Use $g=9.8 \\; m/s^2$).`,
+                        `A $${m}$ kg traffic light is supported by two cables. One cable is horizontal to the left. The other cable makes an angle of $${theta}^\\circ$ with the vertical pole (or $${90-theta}^\\circ$ with horizontal). Calculate the tension in the angled cable. (Use $g=9.8 \\; m/s^2$, assume angle is relative to ceiling).`
+                    ];
+                    qText = pick(templates);
+                    ans = (m * g) / Math.sin(theta * Math.PI/180);
+                    clues = [
+                        "Clue 1: Focus on the vertical (Y-axis) forces. The horizontal rope doesn't help support the weight.",
+                        `Clue 2: Only the vertical component of the angled rope supports the weight. The vertical component is $T_2 \\cdot \\sin(${theta}^\\circ)$.`,
+                        "Clue 3: Set the vertical component equal to the weight: $T_2 \\cdot \\sin(\\theta) = m \\cdot g$. Solve for $T_2$."
+                    ];
+                } else {
+                    const m = randInt(5, 15);
+                    const theta = pick([30, 45, 60]);
+                    const templates = [
+                        `A $${m}$ kg chandelier is hung from the ceiling by two identical ropes forming a V-shape. Both ropes make an angle of $${theta}^\\circ$ with the ceiling. Calculate the tension in ONE of the ropes. (Use $g=9.8 \\; m/s^2$).`,
+                        `A gymnast of mass $${m}$ kg hangs stationary from a pair of gym rings. The straps attached to the rings both make an angle of $${theta}^\\circ$ with the ceiling. Calculate the tension in one of the straps. (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    ans = (m * g) / (2 * Math.sin(theta * Math.PI/180));
+                    clues = [
+                        "Clue 1: Both ropes are helping to pull upwards to counteract gravity.",
+                        "Clue 2: The total upward force is the sum of the vertical components of BOTH ropes: $2 \\cdot (T \\cdot \\sin\\theta)$.",
+                        "Clue 3: Set the total upward force equal to the weight: $2 \\cdot T \\cdot \\sin(\\theta) = m \\cdot g$. Solve for T."
+                    ];
+                }
+            }
+            else { // PULLEY
+                if (level === 1) {
+                    const m1 = randInt(3, 8);
+                    const m2 = randInt(10, 15);
+                    const templates = [
+                        `In a standard Atwood machine (vertical pulley), Mass 1 is $${m1}$ kg and Mass 2 is $${m2}$ kg. Assuming a frictionless and massless pulley, calculate the acceleration of the system. (Use $g=9.8 \\; m/s^2$).`,
+                        `Two buckets are connected by a light rope over a smooth pulley. Bucket A has mass $${m1}$ kg and Bucket B has mass $${m2}$ kg. When released from rest, what is the acceleration of the buckets? (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    ans = g * (m2 - m1) / (m1 + m2);
+                    clues = [
+                        "Clue 1: The heavier mass drives the system downwards, while the lighter mass holds it back. The net force is the difference in their weights.",
+                        "Clue 2: The Net Driving Force is $W_2 - W_1 = (m_2 \\cdot g) - (m_1 \\cdot g)$.",
+                        "Clue 3: The force has to accelerate BOTH masses. Use $a = F_{net} / (m_1 + m_2)$."
+                    ];
+                } else if (level === 2) {
+                    const m1 = randInt(5, 15); 
+                    const m2 = randInt(5, 10); 
+                    const muk = (randInt(1, 4) / 10).toFixed(1);
+                    const templates = [
+                        `Mass 1 ($${m1}$ kg) rests on a rough horizontal table ($\\mu_k = ${muk}$) and is connected by a string over a pulley to a hanging Mass 2 ($${m2}$ kg). Assuming Mass 2 falls, what is the acceleration of the system? (Use $g=9.8 \\; m/s^2$).`,
+                        `A $${m1}$ kg block on a rough desk ($\\mu_k = ${muk}$) is attached via a pulley to a hanging $${m2}$ kg weight. When released, what is the system's acceleration? (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    const w2 = m2 * g;
+                    const fk = muk * m1 * g;
+                    ans = (w2 - fk) / (m1 + m2);
+                    if (ans < 0) ans = 0; 
+                    clues = [
+                        "Clue 1: Mass 1 is on the table, so its gravity doesn't pull the system along the string. The only forward driving force is the weight of the hanging mass ($W_2$).",
+                        "Clue 2: The table is rough, so friction acts on Mass 1 opposing the motion. Calculate kinetic friction: $f_k = \\mu_k \\cdot m_1 \\cdot g$.",
+                        "Clue 3: The Net Driving Force is $W_2 - f_k$. Divide this net force by the total mass ($m_1 + m_2$) to find acceleration."
+                    ];
+                } else {
+                    const m1 = randInt(5, 10); 
+                    const theta = pick([30, 45, 60]);
+                    const m2 = randInt(15, 25); 
+                    const templates = [
+                        `Mass 1 ($${m1}$ kg) is on a smooth inclined plane at $${theta}^\\circ$ to the horizontal. It is connected over a pulley at the top of the incline to a hanging Mass 2 ($${m2}$ kg). Calculate the magnitude of acceleration of the system. (Use $g=9.8 \\; m/s^2$).`,
+                        `A cart of mass $${m1}$ kg rests on a frictionless ramp angled at $${theta}^\\circ$. A rope tied to the cart goes over a pulley to a hanging counterweight of $${m2}$ kg. Find the acceleration of the system. (Use $g=9.8 \\; m/s^2$).`
+                    ];
+                    qText = pick(templates);
+                    const w2 = m2 * g;
+                    const w1x = m1 * g * Math.sin(theta * Math.PI/180);
+                    ans = Math.abs(w2 - w1x) / (m1 + m2);
+                    clues = [
+                        "Clue 1: This is a tug-of-war. The hanging mass pulls in one direction, while the mass on the incline pulls in the opposite direction.",
+                        "Clue 2: Calculate the pulling forces: The hanging mass pulls with $W_2 = m_2 \\cdot g$. The mass on the incline pulls with $W_{1x} = m_1 \\cdot g \\cdot \\sin(\\theta)$.",
+                        "Clue 3: The Net Driving Force is the absolute difference between those two forces. Divide the net force by the total mass ($m_1 + m_2$) to find acceleration."
+                    ];
+                }
+            }
 
-  <!-- NAVIGATION BUTTON AT THE VERY BOTTOM -->
-  <div class="nav-bottom-container">
-    <a href="https://stefanussetiawan1592-dev.github.io/forces/newton.html" class="btn-next-page">
-      Next Topic: Newton's Law ➔
-    </a>
-  </div>
+            return { text: qText, ans: ans, clues: clues };
+        }
 
-</div>
+        // --- UI & LOGIC FUNCTIONS ---
+        function startPractice() {
+            const name = document.getElementById('student-name').value.trim();
+            if (!name) return alert("Please enter your name!");
+            studentName = name;
+            
+            document.getElementById('screen-onboarding').classList.add('hidden');
+            document.getElementById('screen-practice').classList.remove('hidden');
+            document.getElementById('screen-practice').classList.add('flex');
+            
+            currentTopic = parseInt(document.getElementById('topic-selector').value);
+            logEvent(`Started Practice. Initial Topic: ${currentTopic}`);
+            
+            loadNewQuestion();
+        }
 
-<!-- POPUP MODAL FOR EXPLORE MORE API KEY -->
-<div class="modal-overlay" id="apiKeyModal">
-  <div class="modal-content">
-    <h3>✨ Explore More with Gemini AI</h3>
-    <p style="font-size: 0.88rem; color: #333; margin: 0;">Enter your Gemini API Key to ask any custom physics question:</p>
-    <input type="text" id="modalApiKeyInput" placeholder="Paste API Key here..." />
-    <div class="note">Ask your teacher for API Key</div>
-    <div class="modal-actions">
-      <button class="btn-modal btn-save" onclick="saveApiKeyModal()">Save & Enable</button>
-      <button class="btn-modal btn-close" onclick="closeApiKeyModal()">Cancel</button>
-    </div>
-  </div>
-</div>
+        function changeTopic() {
+            currentTopic = parseInt(document.getElementById('topic-selector').value);
+            currentLevel = 1; // Reset level on topic change
+            streak = 0;
+            logEvent(`Changed Topic to ${currentTopic}. Level reset to 1.`);
+            loadNewQuestion();
+        }
 
-<!-- FIREBASE LIBRARIES (v8 SDK Compatibility Mode) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+        function loadNewQuestion() {
+            updateUI();
+            
+            // Reset question state
+            cluesRevealed = 0;
+            attemptsOnCurrentQ = 0;
+            
+            // Generate New Question
+            currentQ = generateQuestion(currentTopic, currentLevel);
+            document.getElementById('question-text').innerHTML = currentQ.text;
+            
+            // Reset Clue Area
+            const clueArea = document.getElementById('clue-area');
+            clueArea.innerHTML = '';
+            clueArea.classList.add('hidden');
+            document.getElementById('btn-clue').disabled = false;
+            document.getElementById('btn-clue').innerHTML = `<i data-lucide="lightbulb" class="w-5 h-5"></i> <span>Need a Clue? (-50 pts)</span>`;
+            
+            // Render MathJax
+            MathJax.typesetPromise([document.getElementById('question-text')]);
 
-<script>
-  // ===================================================
-  // 1. FIREBASE CONFIGURATION
-  // ===================================================
-  const firebaseConfig = {
-    apiKey: "AIzaSyCwh7FpFASNRadgPiiYYWM4EJkw5jcQWPA",
-    authDomain: "physics-forces-reflection.firebaseapp.com",
-    databaseURL: "https://physics-forces-reflection-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "physics-forces-reflection",
-    storageBucket: "physics-forces-reflection.firebasestorage.app",
-    messagingSenderId: "120073256923",
-    appId: "1:120073256923:web:f35bd731ecae6af730b1fe"
-  };
+            // Reset Input/Feedback
+            document.getElementById('student-answer').value = "";
+            document.getElementById('feedback-msg').classList.add('hidden');
+            
+            lucide.createIcons();
+        }
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+        function updateUI() {
+            document.getElementById('streak-counter').innerText = streak;
+            document.getElementById('score-counter').innerText = totalScore;
+            document.getElementById('level-badge').innerText = "Level " + currentLevel;
+            
+            // Color badges
+            const badge = document.getElementById('level-badge');
+            badge.className = "px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wide ";
+            if (currentLevel === 1) badge.className += "bg-blue-100 text-blue-800";
+            if (currentLevel === 2) badge.className += "bg-green-100 text-green-800";
+            if (currentLevel === 3) badge.className += "bg-red-100 text-red-800";
+        }
 
-  // Pre-fill name if stored previously
-  const savedName = localStorage.getItem('studentName');
-  if (savedName) {
-    document.getElementById('studentName').value = savedName;
-  }
+        function showNextClue() {
+            if (cluesRevealed >= 3) return;
+            
+            totalScore -= 50;
+            totalCluesUsed++;
+            updateUI();
+            
+            const clueArea = document.getElementById('clue-area');
+            clueArea.classList.remove('hidden');
+            
+            const clueHtml = `
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg fade-in">
+                    <p class="text-sm text-amber-800 font-medium">${currentQ.clues[cluesRevealed]}</p>
+                </div>
+            `;
+            clueArea.innerHTML += clueHtml;
+            MathJax.typesetPromise([clueArea]);
+            
+            logEvent(`Requested Clue ${cluesRevealed + 1} (Topic ${currentTopic} L${currentLevel}). Score: ${totalScore}`);
+            
+            cluesRevealed++;
+            if (cluesRevealed >= 3) {
+                const btn = document.getElementById('btn-clue');
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="info" class="w-5 h-5"></i> <span>All Clues Revealed</span>`;
+            }
+            lucide.createIcons();
+        }
 
-  // Submit Reflection to Firebase
-  document.getElementById('reflectionForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Publishing...";
+        function checkAnswer() {
+            const inputVal = document.getElementById('student-answer').value;
+            if (inputVal === "") return alert("Please enter a numeric answer!");
+            
+            attemptsOnCurrentQ++;
+            totalAttemptsOverall++;
+            const studentAns = parseFloat(inputVal);
+            const correctAns = currentQ.ans;
+            
+            // Tolerance
+            const isCorrect = Math.abs(studentAns - correctAns) < (Math.max(0.1, correctAns * 0.02));
+            const feedback = document.getElementById('feedback-msg');
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
 
-    const name = document.getElementById('studentName').value.trim();
-    const reflection = document.getElementById('qReflection').value.trim();
-    const timestamp = new Date().toLocaleString();
+            if (isCorrect) {
+                totalScore += 1000;
+                streak++;
+                logEvent(`Correct Answer (Topic ${currentTopic} L${currentLevel}) on attempt ${attemptsOnCurrentQ}. Streak: ${streak}. Score: ${totalScore}`);
+                feedback.classList.add('bg-green-100', 'text-green-800');
+                
+                if (streak >= 2 && currentLevel < 3) {
+                    feedback.innerHTML = `<i data-lucide="trending-up" class="inline w-5 h-5 mr-1"></i> Brilliant! You got 2 right in a row. Leveling up to Level ${currentLevel + 1}!`;
+                    currentLevel++;
+                    setTimeout(() => { streak = 0; loadNewQuestion(); }, 2500);
+                } 
+                else if (streak >= 2 && currentLevel === 3) {
+                    feedback.innerHTML = `<i data-lucide="award" class="inline w-5 h-5 mr-1"></i> Mastered! You've conquered Level 3. Try another topic or finish!`;
+                    // Stay at level 3, reset streak
+                    streak = 0; 
+                    setTimeout(() => { loadNewQuestion(); }, 2500);
+                }
+                else {
+                    feedback.innerHTML = `<i data-lucide="check" class="inline w-5 h-5 mr-1"></i> Correct! (+1000 pts). One more right answer to level up.`;
+                    setTimeout(() => { loadNewQuestion(); }, 2000); 
+                }
+            } else {
+                totalScore -= 100;
+                streak = 0;
+                logEvent(`Incorrect Answer (Topic ${currentTopic} L${currentLevel}). Input: ${studentAns}. Score: ${totalScore}`);
+                feedback.classList.add('bg-red-100', 'text-red-800');
+                feedback.innerHTML = `<i data-lucide="x" class="inline w-5 h-5 mr-1"></i> Incorrect (-100 pts). Try again or request a clue.`;
+                // If they have tried 3 times, maybe offer a new question
+                if(attemptsOnCurrentQ >= 3) {
+                    feedback.innerHTML += `<br><span class="text-sm mt-1">Let's try a different question with similar difficulty.</span>`;
+                    setTimeout(() => { loadNewQuestion(); }, 3000);
+                }
+            }
+            updateUI();
+            lucide.createIcons();
+        }
 
-    localStorage.setItem('studentName', name);
+        async function finishPractice() {
+            if(historyLog.length === 0) return alert("You haven't practiced yet!");
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> <span>Saving Data...</span>`;
+            
+            const finalLog = historyLog.join(" || ");
 
-    db.ref('reflections').push({
-      name: name,
-      reflection: reflection,
-      timestamp: timestamp
-    }).then(() => {
-      alert("Reflection successfully posted to the Peer Wall!");
-      document.getElementById('qReflection').value = "";
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Submit & Share Reflection";
-    }).catch((error) => {
-      alert("Error posting reflection: " + error.message);
-      submitBtn.disabled = false;
-      submitBtn.innerText = "Submit & Share Reflection";
-    });
-  });
-
-  // Listen to Firebase Realtime Database
-  db.ref('reflections').on('value', (snapshot) => {
-    const gridContainer = document.getElementById('reflectionGrid');
-    gridContainer.innerHTML = "";
-
-    const data = snapshot.val();
-    if (!data) {
-      gridContainer.innerHTML = "<p style='grid-column: 1 / -1; text-align: center; color: #777;'><em>No reflections submitted yet. Be the first to share!</em></p>";
-      return;
-    }
-
-    const items = Object.values(data).reverse();
-
-    items.forEach(item => {
-      const cardHtml = `
-        <div class="comment-item">
-          <div class="comment-header">
-            <span>👤 ${escapeHtml(item.name)}</span>
-            <span class="comment-time">🕒 ${escapeHtml(item.timestamp || '')}</span>
-          </div>
-          <p class="comment-text">${escapeHtml(item.reflection)}</p>
-        </div>
-      `;
-      gridContainer.innerHTML += cardHtml;
-    });
-  });
-
-  // ===================================================
-  // 2. MODAL API KEY LOGIC (HANYA MUNCUL DI "EXPLORE MORE")
-  // ===================================================
-  function openApiKeyModal() {
-    const existingKey = localStorage.getItem('customGeminiKey') || "";
-    document.getElementById('modalApiKeyInput').value = existingKey;
-    document.getElementById('apiKeyModal').style.display = 'flex';
-  }
-
-  function closeApiKeyModal() {
-    document.getElementById('apiKeyModal').style.display = 'none';
-  }
-
-  function saveApiKeyModal() {
-    const key = document.getElementById('modalApiKeyInput').value.trim();
-    if (key) {
-      localStorage.setItem('customGeminiKey', key);
-      alert("API Key saved! Custom Gemini AI search is now active.");
-    } else {
-      localStorage.removeItem('customGeminiKey');
-      alert("API Key cleared.");
-    }
-    closeApiKeyModal();
-  }
-
-  // ===================================================
-  // 3. CHATBOT LOGIC
-  // ===================================================
-  
-  // 3A. PRESET TOMBOL LOKAL (LANGSUNG DIJAWAB LOKAL TANPA API KEY & POPUP)
-  function triggerPreset(topic) {
-    const chatBox = document.getElementById('chatBox');
-    
-    // Tampilkan pesan user di chat
-    chatBox.innerHTML += `<div class="msg user">${escapeHtml(topic)}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    // Jawaban lokal dalam Bahasa Inggris
-    let reply = "";
-    if (topic === 'Free Body Diagram') {
-      reply = "A Free Body Diagram (FBD) is a graphical illustration used to visualize the applied forces, moments, and resulting reactions acting on a body. Always draw force vectors starting from the object's center of mass!";
-    } else if (topic === 'Upthrust') {
-      reply = "Upthrust (or buoyant force) is an upward force exerted by a fluid opposing the weight of an immersed object. It depends on the fluid density and the displaced volume.";
-    } else if (topic === 'Friction') {
-      reply = "Friction is a resistive force acting parallel to contacting surfaces that opposes relative sliding motion. It includes static friction (before moving) and kinetic friction (while moving).";
-    } else if (topic === 'Drag') {
-      reply = "Drag is a mechanical fluid friction force opposing an object's motion through a fluid (liquid or gas). It increases significantly with higher speed.";
-    } else if (topic === 'Normal') {
-      reply = "Normal Force (N) is a support force exerted upon an object in contact with a surface. It always acts perpendicular (at 90 degrees) to the contact surface.";
-    } else if (topic === 'Weight') {
-      reply = "Weight (W) is the gravitational force exerted on an object by the Earth. It always points vertically downwards toward the center of the Earth (W = mg).";
-    } else if (topic === 'Tension') {
-      reply = "Tension (T) is a pulling force transmitted through a string, rope, or cable. It always acts along the direction of the string pulling away from the object.";
-    }
-
-    // Tampilkan balasan bot
-    setTimeout(() => {
-      chatBox.innerHTML += `<div class="msg bot">${reply}</div>`;
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }, 200);
-  }
-
-  // 3B. CHAT INPUT BEBAS (MENGGUNAKAN GEMINI API DENGAN ENDPOINT GEMINI-3-FLASH-PREVIEW)
-  function handleKeyPress(e) {
-    if (e.key === 'Enter') sendChatMessage();
-  }
-
-  async function sendChatMessage() {
-    const inputField = document.getElementById('chatInput');
-    const question = inputField.value.trim();
-    if (!question) return;
-
-    const chatBox = document.getElementById('chatBox');
-    
-    // Append User Message
-    chatBox.innerHTML += `<div class="msg user">${escapeHtml(question)}</div>`;
-    inputField.value = "";
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    const apiKey = localStorage.getItem('customGeminiKey');
-
-    // Jika siswa mengetik sendiri tanpa API key, beri petunjuk untuk pakai Explore More
-    if (!apiKey) {
-      setTimeout(() => {
-        chatBox.innerHTML += `<div class="msg bot">To ask custom questions, please click <strong>'✨ Explore More'</strong> above and insert the API Key provided by your teacher!</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }, 300);
-      return;
-    }
-
-    // Append Loading State
-    const loadingId = "loading_" + Date.now();
-    chatBox.innerHTML += `<div class="msg bot" id="${loadingId}"><em>Thinking...</em></div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    try {
-      // Menggunakan endpoint gemini-3-flash-preview yang sudah sukses dipraktekkan
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-      
-      const promptSystem = `You are an encouraging and concise Physics Tutor Assistant for high school students. 
-Answer all queries specifically about Forces and Free Body Diagrams (FBD) in ENGLISH. 
-Keep your explanations short (maximum 2-3 brief sentences), clear, and engaging. 
-Query: ${question}`;
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptSystem }] }]
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error("Invalid API Key or server error. Please re-check your key via 'Explore More'.");
-      }
-
-      const data = await response.json();
-      const reply = data.candidates[0].content.parts[0].text;
-      document.getElementById(loadingId).innerText = reply;
-
-    } catch (err) {
-      document.getElementById(loadingId).innerText = "Error: " + err.message;
-    }
-    
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  // Helper XSS Prevention
-  function escapeHtml(text) {
-    if (!text) return "";
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-</script>
-
+            try {
+                // Submit to GAS
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sheetTarget: "newton_reflection",
+                        studentName: studentName,
+                        finalLevel: `Level ${currentLevel} (Topic ${currentTopic})`, 
+                        attempt: `Att: ${totalAttemptsOverall}, Clues: ${totalCluesUsed}, Score: ${totalScore}`,
+                        history: finalLog
+                    })
+                });
+                alert(`Excellent session, ${studentName}! Your final score is ${totalScore}. Your progress has been recorded.`);
+                location.reload();
+            } catch (error) {
+                alert("Network error, but session completed locally.");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+    </script>
 </body>
 </html>
