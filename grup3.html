@@ -55,6 +55,16 @@
 </head>
 <body>
 
+<div class="progress-container" style="position: sticky; top: 0; background: #fff; padding: 10px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+  <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px;">
+    <span>Progress Modul</span>
+    <span id="progressText">0% Completed</span>
+  </div>
+  <div style="width: 100%; background-color: #e0e0e0; border-radius: 8px; height: 12px; overflow: hidden;">
+    <div id="progressBar" style="width: 0%; height: 100%; background-color: #28a745; transition: width 0.3s ease;"></div>
+  </div>
+</div>
+  
 <div class="container">
   <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab(0)">1. Video Quiz</button>
