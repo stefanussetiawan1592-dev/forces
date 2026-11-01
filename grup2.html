@@ -218,6 +218,28 @@
 </div>
 
 <script>
+  function updateProgressBar() {
+  let completedSections = 0;
+  const totalSections = 4;
+
+  // Cek bagian mana saja yang sudah diselesaikan berdasarkan status global completionStatus
+  if (completionStatus.part1) completedSections++;
+  if (completionStatus.part2) completedSections++;
+  if (completionStatus.part3) completedSections++;
+  if (completionStatus.part4) completedSections++;
+
+  // Hitung persentase
+  const percentage = Math.round((completedSections / totalSections) * 100);
+
+  // Update elemen UI
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+
+  if (progressBar && progressText) {
+    progressBar.style.width = percentage + '%';
+    progressText.innerText = percentage + '% Completed';
+  }
+}
     const isCompleted = localStorage.getItem('diagnosticCompleted');
 
   if (!isCompleted) {
