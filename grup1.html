@@ -218,6 +218,45 @@
 </div>
 
 <script>
+    // ===================================================
+// ===================================================
+// PROGRESS BAR LOGIC BASED ON SECTION COMPLETION
+// ===================================================
+function updateProgressBar() {
+  let completedSections = 0;
+  const totalSections = 4;
+
+  // Cek bagian mana saja yang sudah diselesaikan berdasarkan status global completionStatus
+  if (completionStatus.part1) completedSections++;
+  if (completionStatus.part2) completedSections++;
+  if (completionStatus.part3) completedSections++;
+  if (completionStatus.part4) completedSections++;
+
+  // Hitung persentase
+  const percentage = Math.round((completedSections / totalSections) * 100);
+
+  // Update elemen UI
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+
+  if (progressBar && progressText) {
+    progressBar.style.width = percentage + '%';
+    progressText.innerText = percentage + '% Completed';
+  }
+}
+
+// Integrasikan pembaruan progress bar setiap kali siswa menyelesaikan satu section:
+// 1. Pada event handler submit Video Quiz (Part 1):
+//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part1 = true;
+
+// 2. Pada fungsi submitStoryQuiz() (Part 2):
+//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part2 = true;
+
+// 3. Pada fungsi evaluateSimQuiz() (Part 3):
+//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part3 = true;
+
+// 4. Pada evaluasi/verifikasi FBD (Part 4):
+//    Set completionStatus.part4 = true; lalu panggil updateProgressBar();
   // Cek apakah siswa sudah menyelesaikan diagnostic test
   const isCompleted = localStorage.getItem('diagnosticCompleted');
 
@@ -633,45 +672,7 @@
   loadCase(0); // Init Draw
   drawSim(); // Init Sim
 
-  // ===================================================
-// ===================================================
-// PROGRESS BAR LOGIC BASED ON SECTION COMPLETION
-// ===================================================
-function updateProgressBar() {
-  let completedSections = 0;
-  const totalSections = 4;
 
-  // Cek bagian mana saja yang sudah diselesaikan berdasarkan status global completionStatus
-  if (completionStatus.part1) completedSections++;
-  if (completionStatus.part2) completedSections++;
-  if (completionStatus.part3) completedSections++;
-  if (completionStatus.part4) completedSections++;
-
-  // Hitung persentase
-  const percentage = Math.round((completedSections / totalSections) * 100);
-
-  // Update elemen UI
-  const progressBar = document.getElementById('progressBar');
-  const progressText = document.getElementById('progressText');
-
-  if (progressBar && progressText) {
-    progressBar.style.width = percentage + '%';
-    progressText.innerText = percentage + '% Completed';
-  }
-}
-
-// Integrasikan pembaruan progress bar setiap kali siswa menyelesaikan satu section:
-// 1. Pada event handler submit Video Quiz (Part 1):
-//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part1 = true;
-
-// 2. Pada fungsi submitStoryQuiz() (Part 2):
-//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part2 = true;
-
-// 3. Pada fungsi evaluateSimQuiz() (Part 3):
-//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part3 = true;
-
-// 4. Pada evaluasi/verifikasi FBD (Part 4):
-//    Set completionStatus.part4 = true; lalu panggil updateProgressBar();
 });
 </script>
 </body>
