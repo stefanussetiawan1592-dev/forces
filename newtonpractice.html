@@ -471,11 +471,13 @@
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        sheetTarget: "newton_reflection",
-                        studentName: studentName,
-                        finalLevel: `Level ${currentLevel} (Topic ${currentTopic})`, 
-                        attempt: `Att: ${totalAttemptsOverall}, Clues: ${totalCluesUsed}, Score: ${totalScore}`,
-                        history: finalLog
+                    sheetTarget: "newton_reflection",
+                            studentName: studentName,
+                            finalLevel: `Level ${currentLevel} (Topic ${currentTopic})`, 
+                            attempts: totalAttemptsOverall,
+                            clues: totalCluesUsed,
+                            score: totalScore,
+                            history: finalLog
                     })
                 });
                 alert(`Excellent session, ${studentName}! Your final score is ${totalScore}. Your progress has been recorded.`);
