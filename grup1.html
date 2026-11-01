@@ -305,7 +305,7 @@
     });
   }
   renderVideoQuizzes();
-
+  
   document.getElementById('submitVideoAnsBtn').onclick = async () => {
     let allAnswered = true;
     let totalScore = 0;
@@ -345,6 +345,7 @@
     }
     
     completionStatus.part1 = true;
+    updateProgressBar();
     document.getElementById('submitVideoAnsBtn').innerText = "Answers Submitted";
   };
 
@@ -381,6 +382,7 @@
     fb.innerHTML = `<strong>Responses Recorded!</strong> Data has been successfully submitted to the system.`;
     
     completionStatus.part2 = true;
+    updateProgressBar();
   }
 
   // ==========================================
@@ -493,6 +495,7 @@
     }
     
     completionStatus.part3 = true; 
+    updateProgressBar();
     document.getElementById('simFeedback').className = 'feedback-box feedback-success';
     document.getElementById('simFeedback').innerHTML = '<strong>Lab Data Submitted!</strong> All analytical responses have been successfully recorded.';
   }
@@ -619,7 +622,7 @@
       fb.className = 'feedback-box feedback-success';
       fb.innerHTML = '<strong>Perfect!</strong> All force vectors have the correct direction AND proportional magnitudes!';
       sendGroupDataAsync("Part 4 - FBD", `Case_${currentCase+1}`, "Correct Vectors & Length", "100");
-      if (currentCase === 2) completionStatus.part4 = true; 
+      if (currentCase === 2) completionStatus.part4 = true; updateProgressBar();
     } else {
       fb.className = 'feedback-box feedback-error';
       fb.innerHTML = `<strong>Review Needed:</strong><br>- ` + feedbackMsgs.join('<br>- ');
@@ -631,23 +634,23 @@
   drawSim(); // Init Sim
 
   // ===================================================
-// 4. PROGRESS BAR AUTO-CALCULATION LOGIC
+// ===================================================
+// PROGRESS BAR LOGIC BASED ON SECTION COMPLETION
 // ===================================================
 function updateProgressBar() {
-  // Ambil semua elemen input teks dan textarea di dalam form refleksi
-  const inputs = document.querySelectorAll('.reflection-card input[type="text"], .reflection-card textarea');
-  let filledCount = 0;
+  let completedSections = 0;
+  const totalSections = 4;
 
-  inputs.forEach(input => {
-    if (input.value.trim() !== "") {
-      filledCount++;
-    }
-  });
+  // Cek bagian mana saja yang sudah diselesaikan berdasarkan status global completionStatus
+  if (completionStatus.part1) completedSections++;
+  if (completionStatus.part2) completedSections++;
+  if (completionStatus.part3) completedSections++;
+  if (completionStatus.part4) completedSections++;
 
-  const totalInputs = inputs.length;
-  const percentage = totalInputs > 0 ? Math.round((filledCount / totalInputs) * 100) : 0;
+  // Hitung persentase
+  const percentage = Math.round((completedSections / totalSections) * 100);
 
-  // Update elemen visual progress bar
+  // Update elemen UI
   const progressBar = document.getElementById('progressBar');
   const progressText = document.getElementById('progressText');
 
@@ -657,17 +660,18 @@ function updateProgressBar() {
   }
 }
 
-// Jalankan pemantauan input setelah DOM selesai dimuat
-document.addEventListener("DOMContentLoaded", () => {
-  const inputs = document.querySelectorAll('.reflection-card input[type="text"], .reflection-card textarea');
-  
-  inputs.forEach(input => {
-    // Pasang event listener saat siswa mengetik (input)
-    input.addEventListener('input', updateProgressBar);
-  });
+// Integrasikan pembaruan progress bar setiap kali siswa menyelesaikan satu section:
+// 1. Pada event handler submit Video Quiz (Part 1):
+//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part1 = true;
 
-  // Hitung ulang progress awal (jika nama siswa sudah terisi dari localStorage)
-  updateProgressBar();
+// 2. Pada fungsi submitStoryQuiz() (Part 2):
+//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part2 = true;
+
+// 3. Pada fungsi evaluateSimQuiz() (Part 3):
+//    Tambahkan panggilan: updateProgressBar(); setelah completionStatus.part3 = true;
+
+// 4. Pada evaluasi/verifikasi FBD (Part 4):
+//    Set completionStatus.part4 = true; lalu panggil updateProgressBar();
 });
 </script>
 </body>
