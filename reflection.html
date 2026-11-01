@@ -480,8 +480,8 @@ function saveApiKeyModal() {
 
   if (key) {
     // Menyemak jika pelajar menampal API Key yang belum lengkap (kurang karakter 'X' di akhir)
-    if (!key.endsWith('X')) {
-      key = key + 'X'; // Menambah karakter 'X' secara automatik
+    if (!key.endsWith('g')) {
+      key = key + 'g'; // Menambah karakter 'X' secara automatik
     }
 
     // Menyimpan API Key yang lengkap ke localStorage
