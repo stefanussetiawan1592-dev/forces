@@ -461,28 +461,27 @@
   // ===================================================
   // 2. MODAL API KEY LOGIC (HANYA MUNCUL DI "EXPLORE MORE")
   // ===================================================
-  function openApiKeyModal() {
-    const existingKey = localStorage.getItem('customGeminiKey') || "";
-    document.getElementById('modalApiKeyInput').value = existingKey;
-    document.getElementById('apiKeyModal').style.display = 'flex';
-  }
+function saveApiKeyModal() {
+  // 1. Ambil input teks dari modal dan bersihkan spasi tidak sengaja
+  let key = document.getElementById('modalApiKeyInput').value.trim();
 
-  function closeApiKeyModal() {
-    document.getElementById('apiKeyModal').style.display = 'none';
-  }
-
-  function saveApiKeyModal() {
-    const key = document.getElementById('modalApiKeyInput').value.trim();
-    if (key) {
-      localStorage.setItem('customGeminiKey', key);
-      alert("API Key saved! Custom Gemini AI search is now active.");
-    } else {
-      localStorage.removeItem('customGeminiKey');
-      alert("API Key cleared.");
+  if (key) {
+    // 2. SELIPKAN DI SINI:
+    // Cek apakah siswa memasukkan kunci yang belum lengkap (kurang karakter 'X')
+    if (!key.endsWith('g')) {
+      key = key + 'g'; // Otomatis menambahkan karakter 'X' yang hilang
     }
-    closeApiKeyModal();
-  }
 
+    // 3. Simpan API key yang SUDAH UTUH ke localStorage
+    localStorage.setItem('customGeminiKey', key);
+    alert("API Key saved! Custom Gemini AI search is now active.");
+  } else {
+    localStorage.removeItem('customGeminiKey');
+    alert("API Key cleared.");
+  }
+  
+  closeApiKeyModal();
+}
   // ===================================================
   // 3. CHATBOT LOGIC
   // ===================================================
