@@ -365,7 +365,7 @@
       fb.innerHTML = `<strong>Good effort!</strong> You got ${totalScore}/${videoQuizzes.length} correct. Please review the material if needed.`;
     }
     
-    completionStatus.part1 = true;
+    completionStatus.part1 = true; updateProgressBar();
     document.getElementById('submitVideoAnsBtn').innerText = "Answers Submitted";
   };
 
@@ -401,7 +401,7 @@
     fb.className = 'feedback-box feedback-success';
     fb.innerHTML = `<strong>Responses Recorded!</strong> Data has been successfully submitted to the system.`;
     
-    completionStatus.part2 = true;
+    completionStatus.part2 = true; updateProgressBar();
   }
 
   // ==========================================
@@ -513,7 +513,7 @@
       await sendGroupDataAsync("Part 3 - Simulation", `Sim_Analytic_Q${i}`, ans, "Logged");
     }
     
-    completionStatus.part3 = true; 
+    completionStatus.part3 = true;  updateProgressBar();
     document.getElementById('simFeedback').className = 'feedback-box feedback-success';
     document.getElementById('simFeedback').innerHTML = '<strong>Lab Data Submitted!</strong> All analytical responses have been successfully recorded.';
   }
@@ -640,7 +640,7 @@
       fb.className = 'feedback-box feedback-success';
       fb.innerHTML = '<strong>Perfect!</strong> All force vectors have the correct direction AND proportional magnitudes!';
       sendGroupDataAsync("Part 4 - FBD", `Case_${currentCase+1}`, "Correct Vectors & Length", "100");
-      if (currentCase === 2) completionStatus.part4 = true; 
+      if (currentCase === 2) completionStatus.part4 = true; updateProgressBar();
     } else {
       fb.className = 'feedback-box feedback-error';
       fb.innerHTML = `<strong>Review Needed:</strong><br>- ` + feedbackMsgs.join('<br>- ');
