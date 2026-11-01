@@ -455,11 +455,11 @@
         }
 
 async function finishPractice() {
-    if (historyLog.length === 0) return alert("You haven't practiced yet!");
+    if (historyLog.length === 0) {
+        return alert("Anda belum menjawab soal apapun! Kerjakan minimal 1 soal sebelum menyimpan.");
+    }
 
-    // Mengambil tombol submit secara aman tanpa mengandalkan event global
     const btn = document.querySelector("button[onclick='finishPractice()']");
-    const originalText = btn ? btn.innerHTML : "";
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> <span>Saving Data...</span>`;
@@ -467,30 +467,38 @@ async function finishPractice() {
 
     const finalLog = historyLog.join(" || ");
 
-    try {
-        await fetch(GAS_URL, {
+    const payload = {
+        sheetTarget: "newton_reflection",
+        studentName: studentName || "Tanpa Nama",
+        finalLevel: `Level ${currentLevel || 1} (Topic ${currentTopic || 1})`,
+        attempts: Number(totalAttemptsOverall) || 0,
+        clues: Number(totalCluesUsed) || 0,
+        score: Number(totalScore) || 0,
+        history: finalLog || "Tidak ada riwayat"
+    };
+
+    // Alternatif 1: Kirim menggunakan sendBeacon (Sangat stabil saat ada reload)
+    const blob = new Blob([JSON.stringify(payload)], { type: 'text/plain;charset=UTF-8' });
+    const success = navigator.sendBeacon(GAS_URL, blob);
+
+    if (success) {
+        alert(`Sesi selesai, ${studentName}! Skor akhir Anda: ${totalScore}. Data telah berhasil direkam.`);
+        // Beri jeda 500ms sebelum reload agar browser menyelesaikan rekaman
+        setTimeout(() => { location.reload(); }, 500);
+    } else {
+        // Fallback jika sendBeacon gagal: Pakai Fetch biasa dengan redirect di dalam .then()
+        fetch(GAS_URL, {
             method: 'POST',
             mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sheetTarget: "newton_reflection",
-                studentName: studentName || "Tanpa Nama",
-                finalLevel: `Level ${currentLevel || 1} (Topic ${currentTopic || 1})`,
-                attempts: Number(totalAttemptsOverall) || 0,
-                clues: Number(totalCluesUsed) || 0,
-                score: Number(totalScore) || 0,
-                history: finalLog || "Tidak ada riwayat"
-            })
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            alert(`Sesi selesai, ${studentName}! Skor akhir Anda: ${totalScore}.`);
+            location.reload();
+        }).catch(() => {
+            alert("Gagal terhubung ke server.");
+            if (btn) btn.disabled = false;
         });
-
-        alert(`Excellent session, ${studentName}! Your final score is ${totalScore}. Your progress has been recorded.`);
-        location.reload();
-    } catch (error) {
-        alert("Network error, but session completed locally.");
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
     }
 }
     </script>
