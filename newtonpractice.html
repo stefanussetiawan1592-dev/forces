@@ -468,19 +468,18 @@ async function finishPractice() {
     const finalLog = historyLog.join(" || ");
 
     try {
-        // Submit Payload JSON ke Google Apps Script
         await fetch(GAS_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 sheetTarget: "newton_reflection",
-                studentName: studentName,
-                finalLevel: `Level ${currentLevel} (Topic ${currentTopic})`,
-                attempts: totalAttemptsOverall,
-                clues: totalCluesUsed,
-                score: totalScore,
-                history: finalLog
+                studentName: studentName || "Tanpa Nama",
+                finalLevel: `Level ${currentLevel || 1} (Topic ${currentTopic || 1})`,
+                attempts: Number(totalAttemptsOverall) || 0,
+                clues: Number(totalCluesUsed) || 0,
+                score: Number(totalScore) || 0,
+                history: finalLog || "Tidak ada riwayat"
             })
         });
 
