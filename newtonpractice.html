@@ -454,40 +454,46 @@
             lucide.createIcons();
         }
 
-        async function finishPractice() {
-            if(historyLog.length === 0) return alert("You haven't practiced yet!");
-            
-            const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> <span>Saving Data...</span>`;
-            
-            const finalLog = historyLog.join(" || ");
+async function finishPractice() {
+    if (historyLog.length === 0) return alert("You haven't practiced yet!");
 
-            try {
-                // Submit to GAS
-                await fetch(GAS_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                    sheetTarget: "newton_reflection",
-                            studentName: studentName,
-                            finalLevel: `Level ${currentLevel} (Topic ${currentTopic})`, 
-                            attempts: totalAttemptsOverall,
-                            clues: totalCluesUsed,
-                            score: totalScore,
-                            history: finalLog
-                    })
-                });
-                alert(`Excellent session, ${studentName}! Your final score is ${totalScore}. Your progress has been recorded.`);
-                location.reload();
-            } catch (error) {
-                alert("Network error, but session completed locally.");
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
+    // Mengambil tombol submit secara aman tanpa mengandalkan event global
+    const btn = document.querySelector("button[onclick='finishPractice()']");
+    const originalText = btn ? btn.innerHTML : "";
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 animate-spin"></i> <span>Saving Data...</span>`;
+    }
+
+    const finalLog = historyLog.join(" || ");
+
+    try {
+        // Submit Payload JSON ke Google Apps Script
+        await fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sheetTarget: "newton_reflection",
+                studentName: studentName,
+                finalLevel: `Level ${currentLevel} (Topic ${currentTopic})`,
+                attempts: totalAttemptsOverall,
+                clues: totalCluesUsed,
+                score: totalScore,
+                history: finalLog
+            })
+        });
+
+        alert(`Excellent session, ${studentName}! Your final score is ${totalScore}. Your progress has been recorded.`);
+        location.reload();
+    } catch (error) {
+        alert("Network error, but session completed locally.");
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
+    }
+}
     </script>
 </body>
 </html>
