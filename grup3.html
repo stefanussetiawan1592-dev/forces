@@ -207,6 +207,12 @@
 </div>
 
 <script>
+    const isCompleted = localStorage.getItem('diagnosticCompleted');
+
+  if (!isCompleted) {
+    alert("Start with diagnostic test! Ask your teacher for more information");
+    window.location.href = "index.html"; // Arahkan kembali ke halaman diagnostik
+  }
   // ==========================================
   // GLOBALS & UTILITIES
   // ==========================================
