@@ -463,6 +463,9 @@
     submitBtn.disabled = true;
     submitBtn.innerText = "Submitting Data...";
 
+// 1. Simpan status bahwa tes diagnostik telah selesai diisi
+  localStorage.setItem('diagnosticCompleted', 'true');
+    
     let groupName = "";
     let targetSectionId = "";
     let bannerId = "";
