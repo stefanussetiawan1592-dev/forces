@@ -185,8 +185,21 @@
         function openApiKeyModal() { document.getElementById('api-modal').classList.remove('hidden'); }
         function closeApiKeyModal() { document.getElementById('api-modal').classList.add('hidden'); }
         function saveApiKey() {
-            localStorage.setItem('gemini_api_key', document.getElementById('custom-api-key').value.trim());
-            closeApiKeyModal();
+  // 1. Ambil nilai dari input dan bersihkan spasi yang tidak disengaja
+  let key = document.getElementById('custom-api-key').value.trim();
+
+  if (key) {
+    // 2. Jika kunci di-copy dari Classroom (belum lengkap / kurang huruf 'X' di akhir), tambahkan huruf 'X'
+    if (!key.endsWith('g')) {
+      key = key + 'g';
+    }
+    // 3. Simpan kunci yang sudah utuh ke localStorage
+    localStorage.setItem('gemini_api_key', key);
+  } else {
+    // Jika input kosong, hapus key dari storage
+    localStorage.removeItem('gemini_api_key');
+  }
+                    closeApiKeyModal();
         }
 
         // Camera & Media Logic
