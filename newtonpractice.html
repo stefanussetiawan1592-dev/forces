@@ -227,8 +227,8 @@
                     const m = randInt(5, 20); 
                     const theta = pick([30, 45, 60]);
                     const templates = [
-                        `A store signboard with a mass of $${m}$ kg is hung in equilibrium. It is supported by two ropes: Rope 1 is perfectly horizontal pulling left, and Rope 2 pulls up and to the right at an angle of $${theta}^\\circ$ with the ceiling. What is the tension in Rope 2? (Use $g=9.8 \\; m/s^2$).`,
-                        `A $${m}$ kg traffic light is supported by two cables. One cable is horizontal to the left. The other cable makes an angle of $${theta}^\\circ$ with the vertical pole (or $${90-theta}^\\circ$ with horizontal). Calculate the tension in the angled cable. (Use $g=9.8 \\; m/s^2$, assume angle is relative to ceiling).`
+                        `A store signboard with a mass of $${m}$ kg is hung in equilibrium. It is supported by two ropes: Rope 1 is perfectly horizontal pulling left, and Rope 2 pulls up and to the right at an angle of $${theta}^\\circ$ with the horizontal. What is the tension in Rope 2? (Use $g=9.8 \\; m/s^2$).`,
+                        `A $${m}$ kg traffic light is supported by two cables. One cable is horizontal to the left. The other cable makes an angle of $${theta}^\\circ$ with the horizontal pole (or $${90-theta}^\\circ$ with vertical). Calculate the tension in the angled cable. (Use $g=9.8 \\; m/s^2$, assume angle is relative to ceiling).`
                     ];
                     qText = pick(templates);
                     ans = (m * g) / Math.sin(theta * Math.PI/180);
